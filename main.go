@@ -1,7 +1,7 @@
 package main
 
-import "fmt"
+import "github.com/kopeio/kope/cmd"
 
 func main() {
-	fmt.Println("hello world")
+	cmd.Execute()
 }
