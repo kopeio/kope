@@ -1,42 +1,69 @@
 #  Upgrade a cluster from 1.1 to 1.2
 
+This is an EXPERIMENTAL procedure.  Please find justinsb on Kubernetes
+Slack before using.
+
+### Install kope
+
 ```
 mkdir ~/upgrade
 export GOPATH=~/upgrade
 go get github.com/kopeio/kope
 export PATH=$PATH:~/upgrade/bin
-~```
+```
 
-# Set the REGION env var to the region where your cluster is
+### Let's upgrade your cluster
+
+Set the REGION env var to the region where your cluster is
+```
 REGION=us-west-2
+```
 
-# List all the clusters in ${REGION}
+You may need to set your AWS_PROFILE if you're using a different profile
+```
+export AWS_PROFILE=<my_aws_profile>
+export AWS_DEFAULT__PROFILE=<my_aws_profile>
+```
+
+List all the clusters in ${REGION}
+```
 > kope discover clusters --region ${REGION}
 kubernetes	52.27.60.160	us-west-2a
+```
 
-# The first column is your cluster ID (likely `kubernetes`)
-# The second column is your master IP, and should match the output of `kubectl cluster-info`
-# The third column is your zone
+* The first column is your cluster ID (likely `kubernetes`)
+* The second column is your master IP, and should match the output of `kubectl cluster-info`
+* The third column is your zone
 
-# Set the MASTER_IP & ZONE env vars to match your cluster (as discovered above)
+Set the MASTER_IP & ZONE env vars to match your cluster (as discovered above)
+```
 MASTER_IP=52.27.60.160
 ZONE=us-west-2a
+```
 
-# You will also need the IP address of one of your nodes
+You will also need the IP address of one of your nodes
+```
 kubectl get nodes -ojson | grep -A1 ExternalIP
+```
 
-# Extract out one of the 'ExternalIP' values
-NODE_IP=1.2.3.4
+Extract out one of the 'ExternalIP' values
+```
+NODE_IP=52.27.77.51
+```
 
-# Set ssh_key to the SSH key you're using with your cluster
+Set ssh_key to the SSH key you're using with your cluster
+```
 ssh_key=~/.ssh/kube_aws_rsa
-_
-# Extract the configuration and keys from your existing cluster
-kope export cluster --master ${MASTER_IP} -i ${ssh_key} --logtostderr --node ${NODE_IP} --dest upgrade11/
+```
 
-# This should have extracted keys & configuration from the running cluster:
-find upgrade11/
-# should show ....
+Run kope to extract the configuration and keys from your existing cluster:
+```
+kope export cluster --master ${MASTER_IP} -i ${ssh_key} --logtostderr --node ${NODE_IP} --dest upgrade11/
+```
+
+This should have extracted keys & configuration from the running cluster:
+```
+> find upgrade11/
 upgrade11/
 upgrade11/pki
 upgrade11/pki/ca.crt
@@ -49,10 +76,12 @@ upgrade11/pki/private/cn=kubernetes-master.key
 upgrade11/pki/private/cn=kubecfg.key
 upgrade11/pki/private/cn=kubelet.key
 upgrade11/kubernetes.yaml
+```
 
+kubernetes.yaml has your configuration; you probably want to take a look
+to make sure it makes sense!
 
-
-# kubernetes.yaml has your configuration
+```
 > cat upgrade11/kubernetes.yaml
 AllocateNodeCIDRs: true
 CloudProvider: aws
@@ -82,18 +111,23 @@ ServiceClusterIPRange: 10.0.0.0/16
 SubnetID: subnet-d32547a5
 VPCID: vpc-d9080cbd
 Zone: us-west-2a
+```
 
-# Download the kubernetes version that you are going to install
+Download the kubernetes version that you are going to install (note:
+only tested with v1.2.0 right now!):
+```
 release=v1.2.0
 mkdir release-${release}
 wget https://storage.googleapis.com/kubernetes-release/release/${release}/kubernetes.tar.gz -O release-${release}/kubernetes.tar.gz
 tar zxf  release-${release}/kubernetes.tar.gz -C  release-${release}
+```
 
-# See what changes will be made if we apply the cluster changes
+Let's get a preview of the changes that will be made if we apply the cluster changes:
+```
 kope create cluster -i ${ssh_key} -d upgrade11/ -r release-${release}/kubernetes/ --logtostderr -t dryrun
+```
 
 You should see something like this:
-
 ```
 Upload resources:
   bootstrap     1ff7f9b7f9596fe2224d4d4765c98161b89ba33d
@@ -198,8 +232,7 @@ an issue before proceeding!
 
 You will note that there will be some warnings, because we don't have the CA key
 (https://github.com/kubernetes/kubernetes/issues/23264)  This means that we can't generate any
-new certificates.  You'll also (probably)
-see that you aren't using an elastic IP, because we will `allocate-address` a new one
+new certificates.  You'll also (probably) see that you aren't using an elastic IP, because we will `allocate-address` a new one
 in the above output.
 
 e.g.
@@ -212,7 +245,7 @@ Unfortunately the new Elastic IP will be a new IP address, and this will require
 
 Presuming that's right, we'll need to recreate all our keys, sadly.
 
-Backup the existing keys & config, and then delete the keys:
+If you weren't using an Elastic IP, backup the existing keys & config, and then delete the keys:
 ```
 cp -r upgrade11/ upgrade11.backup/
 rm -rf upgrade11/pki/
@@ -220,56 +253,90 @@ rm -rf upgrade11/pki/
 
 Now comes the moment of truth.
 
+Shut down your master (output as INSTANCE_1 above)
+```
+INSTANCE_1=<master instance id>
+aws ec2 --region ${REGION} terminate-instances --instance-id ${INSTANCE_1}
+```
 
-# Shut down your master (output as INSTANCE_1 above)
-aws ec2 --region ${REGION} terminate-instances --instance-id i-8d247c4a
-
-# Reconfigure your cluster:
+Reconfigure your cluster:
+```
 kope create cluster -i ${ssh_key} -d upgrade11/ -r release-${release}/kubernetes/ --logtostderr -t direct
+```
 
-# Now once again list your clusters; if you weren't using an elastic IP previously, a new one will have been allocated
-kope discover clusters --region ${REGION}
+Now once again list your clusters; if you weren't using an elastic IP previously, a new one will have been allocated
+```
+> kope discover clusters --region ${REGION}
+kubernetes      52.25.210.245   us-west-2a
+```
 
-MASTER_IP=52.34.179.39 # or whatever it shows
+Update MASTER_IP to the new IP address:
+```
+MASTER_IP=52.25.210.245 # or whatever it shows
+```
 
 
-# Now, if the IP address changed, this means your kubecfg is now pointing to an invalid IP
-# The kope create kubecfg will update with a new configuration:
+Now, if the IP address changed, this means your kubecfg is now pointing to an invalid IP
+Running `kope create kubecfg` will update with a new configuration:
+```
 kope create kubecfg -i ${ssh_key} --master ${MASTER_IP}
+```
 
+(If you see `error reading remote file "/srv/kubernetes/ca.crt"`, you
+might need to wait a few minutes for the master to configure itself)
 
-# If you now try `kubectl get nodes`, you should connect but the certificates are still not fully updated.
+If you now try `kubectl get nodes`, you should connect but the certificates are still not fully updated.
+```
 > kubectl get nodes
 Unable to connect to the server: x509: certificate is valid for 52.27.60.160, 10.0.0.1, not 52.34.179.39
+```
 
-# This is because we sent the correct certificates, but the script kept the old certificates
-# (as found on the persistent disk)
+(If you see `The connection to the server 52.25.210.245 was refused - did you specify the right host or port?`,
+you probably need to wait a few more minutes for the cluster to come up)
 
-PROBABLY BETTER JUST TO AUTOMATE THIS (MAYBE AS PART OF K8S DEPLOY)
+This is because we sent the correct certificates, but the initialization
+script kept the old certificates (as found on the persistent disk).  So
+we need to force-push the new certificates to the master:
 
-ssh -i ${ssh_key} admin@${MASTER_IP} mkdir /tmp/ca
+TODO: PROBABLY BETTER JUST TO AUTOMATE THIS (MAYBE AS PART OF K8S DEPLOY)
+
+Run the following:
+```
+echo "" | ssh -i ${ssh_key} admin@${MASTER_IP} mkdir /tmp/ca
 scp -i ${ssh_key} upgrade11/pki/ca.crt  admin@${MASTER_IP}:/tmp/ca/ca.crt
 scp -i ${ssh_key} upgrade11/pki/issued/cn\=kubernetes-master.crt  admin@${MASTER_IP}:/tmp/ca/server.cert
 scp -i ${ssh_key} upgrade11/pki/private/cn\=kubernetes-master.key admin@${MASTER_IP}:/tmp/ca/server.key
 scp -i ${ssh_key} upgrade11/pki/issued/cn\=kubecfg.crt  admin@${MASTER_IP}:/tmp/ca/kubecfg.crt
 scp -i ${ssh_key} upgrade11/pki/private/cn\=kubecfg.key admin@${MASTER_IP}:/tmp/ca/kubecfg.key
-ssh -i ${ssh_key} admin@${MASTER_IP} sudo cp /tmp/ca/* /mnt/master-pd/srv/kubernetes/
-ssh -i ${ssh_key} admin@${MASTER_IP} sudo chown root:root /mnt/master-pd/srv/kubernetes/ca.crt /mnt/master-pd/srv/kubernetes/server.* /mnt/master-pd/srv/kubernetes/kubecfg.*
-ssh -i ${ssh_key} admin@${MASTER_IP} sudo chmod 600  /mnt/master-pd/srv/kubernetes/ca.crt /mnt/master-pd/srv/kubernetes/server.* /mnt/master-pd/srv/kubernetes/kubecfg.*
-ssh -i ${ssh_key} admin@${MASTER_IP} sudo rm -rf /tmp/ca
-ssh -i ${ssh_key} admin@${MASTER_IP} sudo systemctl restart docker
+echo "" | ssh -i ${ssh_key} admin@${MASTER_IP} sudo cp /tmp/ca/* /mnt/master-pd/srv/kubernetes/
+echo "" | ssh -i ${ssh_key} admin@${MASTER_IP} sudo chown root:root /mnt/master-pd/srv/kubernetes/ca.crt /mnt/master-pd/srv/kubernetes/server.* /mnt/master-pd/srv/kubernetes/kubecfg.*
+echo "" | ssh -i ${ssh_key} admin@${MASTER_IP} sudo chmod 600  /mnt/master-pd/srv/kubernetes/ca.crt /mnt/master-pd/srv/kubernetes/server.* /mnt/master-pd/srv/kubernetes/kubecfg.*
+echo "" | ssh -i ${ssh_key} admin@${MASTER_IP} sudo rm -rf /tmp/ca
+echo "" | ssh -i ${ssh_key} admin@${MASTER_IP} sudo systemctl restart docker
+```
 
-# And then re-update the configuration:
+And then re-update the configuration:
+```
 kope create kubecfg -i ${ssh_key} --master ${MASTER_IP}
+```
 
+Now kubectl should be working:
+```
+kubectl get nodes
+```
 
-# To get your nodes to the latest version, you will need to restart them
-# You can list them using:
+To get your nodes to the latest version, you will need to restart them also.
+You can list them using:
+```
 kubectl get nodes -ojson  | jq -r .items[].spec.externalID
+```
 
-# Shut them down using:
+Shut them down using:
+```
+kubectl get nodes -ojson  | jq -r .items[].spec.externalID | xargs aws --region ${REGION} ec2 terminate-instances --instance-ids 
+```
 
-kubectl get nodes -ojson  | jq -r .items[].spec.externalID | xargs aws ec2 terminate-instances --instance-ids 
-
-# It is then fun to watch your nodes get removed and then (after a few minutes) come back
+It is then fun to watch your nodes get removed and then (after a few minutes) come back
+```
 watch kubectl get nodes
+```
