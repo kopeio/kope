@@ -8,10 +8,6 @@ import (
 	"github.com/kopeio/kope/pkg/fi"
 )
 
-type RouteTableRenderer interface {
-	RenderRouteTable(actual, expected, changes *RouteTable) error
-}
-
 type RouteTable struct {
 	fi.SimpleUnit
 
@@ -81,8 +77,7 @@ func (e *RouteTable) Run(c *fi.RunContext) error {
 		return err
 	}
 
-	target := c.Target.(RouteTableRenderer)
-	return target.RenderRouteTable(a, e, changes)
+	return c.Render(a, e, changes)
 }
 
 func (s *RouteTable) checkChanges(a, e, changes *RouteTable) error {

@@ -9,10 +9,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 )
 
-type InstanceVolumeAttachmentRenderer interface {
-	RenderInstanceVolumeAttachment(actual, expected, changes *InstanceVolumeAttachment) error
-}
-
 type InstanceVolumeAttachment struct {
 	fi.SimpleUnit
 
@@ -76,8 +72,7 @@ func (e *InstanceVolumeAttachment) Run(c *fi.RunContext) error {
 		return err
 	}
 
-	target := c.Target.(InstanceVolumeAttachmentRenderer)
-	return target.RenderInstanceVolumeAttachment(a, e, changes)
+	return c.Render(a, e, changes)
 }
 
 func (s *InstanceVolumeAttachment) checkChanges(a, e, changes *InstanceVolumeAttachment) error {

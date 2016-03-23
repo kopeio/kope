@@ -9,10 +9,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 )
 
-type RouteTableAssociationRenderer interface {
-	RenderRouteTableAssociation(actual, expected, changes *RouteTableAssociation) error
-}
-
 type RouteTableAssociation struct {
 	fi.SimpleUnit
 
@@ -95,8 +91,7 @@ func (e *RouteTableAssociation) Run(c *fi.RunContext) error {
 		return err
 	}
 
-	target := c.Target.(RouteTableAssociationRenderer)
-	return target.RenderRouteTableAssociation(a, e, changes)
+	return c.Render(a, e, changes)
 }
 
 func (s *RouteTableAssociation) checkChanges(a, e, changes *RouteTableAssociation) error {

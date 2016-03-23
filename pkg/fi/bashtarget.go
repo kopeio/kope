@@ -23,11 +23,14 @@ type BashTarget struct {
 	vars                 map[string]*BashVar
 	prefixCounts         map[string]int
 	resourcePrefixCounts map[string]int
+
+	baseDir              string
+	resourcesDir         string
 }
 
 var _ Target = &BashTarget{}
 
-func NewBashTarget(cloud *AWSCloud, filestore FileStore) *BashTarget {
+func NewBashTarget(cloud *AWSCloud, filestore FileStore, baseDir string) (*BashTarget, error) {
 	b := &BashTarget{Cloud: cloud, filestore: filestore}
 	b.ec2Args = []string{"aws", "ec2"}
 	b.autoscalingArgs = []string{"aws", "autoscaling"}
@@ -35,7 +38,15 @@ func NewBashTarget(cloud *AWSCloud, filestore FileStore) *BashTarget {
 	b.vars = make(map[string]*BashVar)
 	b.prefixCounts = make(map[string]int)
 	b.resourcePrefixCounts = make(map[string]int)
-	return b
+
+	b.baseDir = baseDir
+	b.resourcesDir = path.Join(b.baseDir, "bash_resources")
+	err := os.MkdirAll(b.resourcesDir, 0700)
+	if err != nil {
+		return nil, fmt.Errorf("error creating directories %q: %v", b.resourcesDir, err)
+	}
+
+	return b, nil
 }
 
 type BashVar struct {
@@ -295,13 +306,12 @@ func (t *BashTarget) FindValue(u Unit) (string, bool) {
 }
 
 func (t *BashTarget) generateDynamicPath(prefix string) string {
-	basePath := "resources"
 	n := t.resourcePrefixCounts[prefix]
 	n++
 	t.resourcePrefixCounts[prefix] = n
 
 	name := prefix + "_" + strconv.Itoa(n)
-	p := path.Join(basePath, name)
+	p := path.Join(t.resourcesDir, name)
 	return p
 }
 
@@ -338,7 +348,7 @@ func (t *BashTarget) PutResource(key string, r Resource, hashAlgorithm HashAlgor
 	return t.filestore.PutResource(key, r, hashAlgorithm)
 }
 
-func (t *BashTarget) WaitForInstanceRunning(instance Unit)  {
+func (t *BashTarget) WaitForInstanceRunning(instance Unit) {
 	instanceID := t.ReadVar(instance)
 	t.AddBashCommand("wait-for-instance-state", instanceID, "running")
 }

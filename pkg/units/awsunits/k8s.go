@@ -4,7 +4,6 @@ import (
 	"github.com/kopeio/kope/pkg/fi"
 	"github.com/golang/glog"
 	"strconv"
-	"path"
 	"net"
 	"fmt"
 	"encoding/binary"
@@ -40,6 +39,11 @@ type K8s struct {
 	MasterVolumeSize              *int
 	MasterVolumeType              string
 	MasterCIDR                    string
+	MasterRoleDocument fi.Resource
+	MasterRolePolicy fi.Resource
+
+	NodeRoleDocument fi.Resource
+	NodeRolePolicy fi.Resource
 
 	NodeCount                     int
 
@@ -403,7 +407,6 @@ func (k*K8s) Init() {
 	k.MasterInstanceType = "m3.medium"
 	k.NodeInstanceType = "m3.medium"
 	k.MasterInternalIP = "172.20.0.9"
-	k.BootstrapScript = staticResource("aws/bootstrap-script")
 	k.NodeCount = 2
 	k.DockerStorage = "aufs"
 	k.MasterIPRange = "10.246.0.0/24"
@@ -586,14 +589,14 @@ func (k *K8s) Add(c *fi.BuildContext) {
 
 	iamMasterRole := &IAMRole{
 		Name:               String("kubernetes-master"),
-		RolePolicyDocument: staticResource("aws/iam/kubernetes-master-role.json"),
+		RolePolicyDocument: k.MasterRoleDocument,
 	}
 	c.Add(iamMasterRole)
 
 	iamMasterRolePolicy := &IAMRolePolicy{
 		Role:           iamMasterRole,
 		Name:           String("kubernetes-master"),
-		PolicyDocument: staticResource("aws/iam/kubernetes-master-policy.json"),
+		PolicyDocument: k.MasterRolePolicy,
 	}
 	c.Add(iamMasterRolePolicy)
 
@@ -610,14 +613,14 @@ func (k *K8s) Add(c *fi.BuildContext) {
 
 	iamNodeRole := &IAMRole{
 		Name:             String("kubernetes-minion"),
-		RolePolicyDocument: staticResource("aws/iam/kubernetes-minion-role.json"),
+		RolePolicyDocument: k.NodeRoleDocument,
 	}
 	c.Add(iamNodeRole)
 
 	iamNodeRolePolicy := &IAMRolePolicy{
 		Role:           iamNodeRole,
 		Name:          String("kubernetes-minion"),
-		PolicyDocument: staticResource("aws/iam/kubernetes-minion-policy.json"),
+		PolicyDocument: k.NodeRolePolicy,
 	}
 	c.Add(iamNodeRolePolicy)
 
@@ -765,11 +768,6 @@ func (k *K8s) Add(c *fi.BuildContext) {
 	}
 	c.Add(nodeGroup)
 
-}
-
-func staticResource(key string) fi.Resource {
-	p := path.Join("_resources", key)
-	return fi.NewFileResource(p)
 }
 
 func (k *K8s) GetWellKnownServiceIP(id int) (net.IP, error) {

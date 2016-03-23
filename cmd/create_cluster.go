@@ -11,6 +11,9 @@ import (
 	"os"
 	"io/ioutil"
 	"golang.org/x/crypto/ssh"
+	"github.com/kopeio/kope/pkg/kutil"
+	"strings"
+	"bytes"
 )
 
 type CreateClusterCmd struct {
@@ -104,6 +107,19 @@ func (c*CreateClusterCmd) Run() error {
 	k.ServerBinaryTar = fi.NewFileResource(path.Join(c.ReleaseDir, "server/kubernetes-server-linux-amd64.tar.gz"))
 	k.SaltTar = fi.NewFileResource(path.Join(c.ReleaseDir, "server/kubernetes-salt.tar.gz"))
 
+	k.MasterRoleDocument = fi.NewFileResource(path.Join(c.ReleaseDir, "cluster/aws/templates/iam/kubernetes-master-role.json"))
+	k.MasterRolePolicy = fi.NewFileResource(path.Join(c.ReleaseDir, "cluster/aws/templates/iam/kubernetes-master-policy.json"))
+
+	k.NodeRoleDocument = fi.NewFileResource(path.Join(c.ReleaseDir, "cluster/aws/templates/iam/kubernetes-minion-role.json"))
+	k.NodeRolePolicy = fi.NewFileResource(path.Join(c.ReleaseDir, "cluster/aws/templates/iam/kubernetes-minion-policy.json"))
+
+	bootstrapScript, err := buildAWSBootstrapScript(c.ReleaseDir)
+	if err != nil {
+		return err
+	}
+
+	k.BootstrapScript = fi.NewStringResource(bootstrapScript)
+
 	glog.V(4).Infof("Configuration is %s", awsunits.DebugPrint(k))
 
 	if k.ClusterID == "" {
@@ -119,13 +135,17 @@ func (c*CreateClusterCmd) Run() error {
 		c.S3Region = region
 	}
 
-	if c.S3Bucket == "" {
-		// TODO: Implement the generation logic
-		return fmt.Errorf("s3-bucket is required (for now!)")
-	}
-
 	tags := map[string]string{"KubernetesCluster": k.ClusterID}
 	cloud := fi.NewAWSCloud(region, tags)
+
+	if c.S3Bucket == "" {
+		b, err := kutil.GetDefaultS3Bucket(cloud)
+		if err != nil {
+			return err
+		}
+		glog.Infof("Using default S3 bucket: %s", b)
+		c.S3Bucket = b
+	}
 
 	s3Bucket, err := cloud.S3.EnsureBucket(c.S3Bucket, c.S3Region)
 	if err != nil {
@@ -145,7 +165,10 @@ func (c*CreateClusterCmd) Run() error {
 	case "direct":
 		target = fi.NewAWSAPITarget(cloud, filestore)
 	case "bash":
-		bashTarget = fi.NewBashTarget(cloud, filestore)
+		bashTarget, err = fi.NewBashTarget(cloud, filestore, ".")
+		if err != nil {
+			return err
+		}
 		target = bashTarget
 	default:
 		return fmt.Errorf("unsupported target type %q", c.Target)
@@ -179,4 +202,37 @@ func (c*CreateClusterCmd) Run() error {
 
 	fmt.Printf("\n\nDone\n")
 	return nil
+}
+
+func buildAWSBootstrapScript(releaseDir string) (string, error) {
+	p := path.Join(releaseDir, "cluster/gce/configure-vm.sh")
+	gceConfigure, err := ioutil.ReadFile(p)
+	if err != nil {
+		return "", fmt.Errorf("error reading script %q: %v", p, err)
+	}
+
+	p = path.Join(releaseDir, "cluster/aws/templates/configure-vm-aws.sh")
+	awsConfigure, err := ioutil.ReadFile(p)
+	if err != nil {
+		return "", fmt.Errorf("error reading script %q: %v", p, err)
+	}
+
+	p = path.Join(releaseDir, "cluster/aws/templates/format-disks.sh")
+	awsFormatDisks, err := ioutil.ReadFile(p)
+	if err != nil {
+		return "", fmt.Errorf("error reading script %q: %v", p, err)
+	}
+
+	var b bytes.Buffer
+	for _, gceLine := range strings.Split(string(gceConfigure), "\n") {
+		if strings.Contains(gceLine, "AWS_OVERRIDE_HERE") {
+			b.Write(awsConfigure)
+			b.Write(awsFormatDisks)
+		} else {
+			b.WriteString(gceLine)
+			b.WriteString("\n")
+		}
+	}
+
+	return b.String(), nil
 }

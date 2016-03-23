@@ -8,10 +8,6 @@ import (
 	"github.com/kopeio/kope/pkg/fi"
 )
 
-type SubnetRenderer interface {
-	RenderSubnet(actual, expected, changes *Subnet) error
-}
-
 type Subnet struct {
 	fi.SimpleUnit
 
@@ -85,8 +81,7 @@ func (e *Subnet) Run(c *fi.RunContext) error {
 		return err
 	}
 
-	target := c.Target.(SubnetRenderer)
-	return target.RenderSubnet(a, e, changes)
+	return c.Render(a, e, changes)
 }
 
 func (s *Subnet) checkChanges(a, e, changes *Subnet) error {

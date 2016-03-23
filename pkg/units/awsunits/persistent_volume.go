@@ -19,10 +19,6 @@ type PersistentVolume struct {
 	Name             *string
 }
 
-type PersistentVolumeRenderer interface {
-	RenderPersistentVolume(actual, expected, changes *PersistentVolume) error
-}
-
 func (s *PersistentVolume) GetID() *string {
 	return s.ID
 }
@@ -89,8 +85,7 @@ func (e *PersistentVolume) Run(c *fi.RunContext) error {
 		return err
 	}
 
-	target := c.Target.(PersistentVolumeRenderer)
-	return target.RenderPersistentVolume(a, e, changes)
+	return c.Render(a, e, changes)
 }
 
 func (s *PersistentVolume) checkChanges(a, e, changes *PersistentVolume) error {

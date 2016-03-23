@@ -90,7 +90,6 @@ func equalFieldValues(a, e reflect.Value) bool {
 				if err != nil {
 					glog.Fatalf("error while comparing resources: %v", err)
 				} else {
-					glog.Infof("RESOURCE COMPARISON %v", same)
 					return same
 				}
 			}

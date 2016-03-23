@@ -1,6 +1,10 @@
 package fi
 
-import "github.com/golang/glog"
+import (
+	"github.com/golang/glog"
+	"reflect"
+	"fmt"
+)
 
 type RunMode int
 
@@ -52,5 +56,34 @@ func (c *RunContext) Run() error {
 }
 
 func (c*RunContext) Render(a, e, changes interface{}) error {
-	panic("not implemented")
+	var methodName string
+	switch c.Target.(type) {
+	case *AWSAPITarget:
+		methodName = "RenderAWS"
+	case *BashTarget:
+		methodName = "RenderBash"
+	default:
+		return fmt.Errorf("Unhandled target type: %v", c.Target)
+	}
+
+	v := reflect.ValueOf(e)
+	vType := v.Type()
+
+	_, found := vType.MethodByName(methodName)
+	if !found {
+		return fmt.Errorf("Type does not support Render function %s: %T", methodName, v.Type())
+	}
+	var args  []reflect.Value
+	args = append(args, reflect.ValueOf(c.Target))
+	args = append(args, reflect.ValueOf(a))
+	args = append(args, reflect.ValueOf(e))
+	args = append(args, reflect.ValueOf(changes))
+	glog.V(4).Infof("Calling method %s on %T", methodName, e)
+	m := v.MethodByName(methodName)
+	rv := m.Call(args)
+	var rvErr error
+	if !rv[0].IsNil() {
+		rvErr = rv[0].Interface().(error)
+	}
+	return rvErr
 }

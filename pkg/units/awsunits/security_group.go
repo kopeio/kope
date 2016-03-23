@@ -8,10 +8,6 @@ import (
 	"github.com/kopeio/kope/pkg/fi"
 )
 
-type SecurityGroupRenderer interface {
-	RenderSecurityGroup(actual, expected, changes *SecurityGroup) error
-}
-
 type SecurityGroup struct {
 	fi.SimpleUnit
 
@@ -93,8 +89,7 @@ func (e *SecurityGroup) Run(c *fi.RunContext) error {
 		return err
 	}
 
-	target := c.Target.(SecurityGroupRenderer)
-	return target.RenderSecurityGroup(a, e, changes)
+	return c.Render(a, e, changes)
 }
 
 func (s *SecurityGroup) checkChanges(a, e, changes *SecurityGroup) error {

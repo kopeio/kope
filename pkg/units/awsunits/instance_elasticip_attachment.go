@@ -8,10 +8,6 @@ import (
 	"github.com/kopeio/kope/pkg/fi"
 )
 
-type InstanceElasticIPAttachmentRenderer interface {
-	RenderInstanceElasticIPAttachment(actual, expected, changes *InstanceElasticIPAttachment) error
-}
-
 type InstanceElasticIPAttachment struct {
 	fi.SimpleUnit
 
@@ -75,8 +71,7 @@ func (e *InstanceElasticIPAttachment) Run(c *fi.RunContext) error {
 		return err
 	}
 
-	target := c.Target.(InstanceElasticIPAttachmentRenderer)
-	return target.RenderInstanceElasticIPAttachment(a, e, changes)
+	return c.Render(a, e, changes)
 }
 
 func (s *InstanceElasticIPAttachment) checkChanges(a, e, changes *InstanceElasticIPAttachment) error {

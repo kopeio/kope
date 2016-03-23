@@ -9,10 +9,6 @@ import (
 	"github.com/kopeio/kope/pkg/fi"
 )
 
-type VPCRenderer interface {
-	RenderVPC(actual, expected, changes *VPC) error
-}
-
 type VPC struct {
 	fi.SimpleUnit
 
@@ -116,8 +112,7 @@ func (e *VPC) Run(c *fi.RunContext) error {
 		return nil
 	}
 
-	target := c.Target.(VPCRenderer)
-	return target.RenderVPC(a, e, changes)
+	return c.Render(a, e, changes)
 }
 
 func (_*VPC) RenderAWS(t *fi.AWSAPITarget, a, e, changes *VPC) error {

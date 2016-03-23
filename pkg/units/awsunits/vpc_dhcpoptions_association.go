@@ -7,10 +7,6 @@ import (
 	"github.com/kopeio/kope/pkg/fi"
 )
 
-type VPCDHCPOptionsAssociationRenderer interface {
-	RenderVPCDHCPOptionsAssociation(actual, expected, changes *VPCDHCPOptionsAssociation) error
-}
-
 type VPCDHCPOptionsAssociation struct {
 	fi.SimpleUnit
 
@@ -60,8 +56,7 @@ func (e *VPCDHCPOptionsAssociation) Run(c *fi.RunContext) error {
 		return err
 	}
 
-	target := c.Target.(VPCDHCPOptionsAssociationRenderer)
-	return target.RenderVPCDHCPOptionsAssociation(a, e, changes)
+	return c.Render(a, e, changes)
 }
 
 func (s *VPCDHCPOptionsAssociation) checkChanges(a, e, changes *VPCDHCPOptionsAssociation) error {

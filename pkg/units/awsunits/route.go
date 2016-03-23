@@ -9,10 +9,6 @@ import (
 	"github.com/kopeio/kope/pkg/fi"
 )
 
-type RouteRenderer interface {
-	RenderRoute(actual, expected, changes *Route) error
-}
-
 type Route struct {
 	fi.SimpleUnit
 
@@ -87,8 +83,7 @@ func (e *Route) Run(c *fi.RunContext) error {
 		return err
 	}
 
-	target := c.Target.(RouteRenderer)
-	return target.RenderRoute(a, e, changes)
+	return c.Render(a, e, changes)
 }
 
 func (s *Route) checkChanges(a, e, changes *Route) error {

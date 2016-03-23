@@ -9,10 +9,6 @@ import (
 	"github.com/kopeio/kope/pkg/fi"
 )
 
-type IAMRolePolicyRenderer interface {
-	RenderIAMRolePolicy(actual, expected, changes *IAMRolePolicy) error
-}
-
 type IAMRolePolicy struct {
 	fi.SimpleUnit
 
@@ -70,8 +66,7 @@ func (e *IAMRolePolicy) Run(c *fi.RunContext) error {
 		return err
 	}
 
-	target := c.Target.(IAMRolePolicyRenderer)
-	return target.RenderIAMRolePolicy(a, e, changes)
+	return c.Render(a, e, changes)
 }
 
 func (s *IAMRolePolicy) checkChanges(a, e, changes *IAMRolePolicy) error {

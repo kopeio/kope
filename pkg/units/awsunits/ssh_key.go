@@ -9,10 +9,6 @@ import (
 	"github.com/kopeio/kope/pkg/fi"
 )
 
-type SSHKeyRenderer interface {
-	RenderSSHKey(actual, expected, changes *SSHKey) error
-}
-
 type SSHKey struct {
 	fi.SimpleUnit
 
@@ -85,8 +81,7 @@ func (e *SSHKey) Run(c *fi.RunContext) error {
 		return err
 	}
 
-	target := c.Target.(SSHKeyRenderer)
-	return target.RenderSSHKey(a, e, changes)
+	return c.Render(a, e, changes)
 }
 
 func (s *SSHKey) checkChanges(a, e, changes *SSHKey) error {
