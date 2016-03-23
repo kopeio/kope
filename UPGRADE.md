@@ -1,7 +1,11 @@
+#  Upgrade a cluster from 1.1 to 1.2
 
-To upgrade from 1.1 to 1.2
-
-go install github.com/kopeio/kope
+```
+mkdir ~/upgrade
+export GOPATH=~/upgrade
+go get github.com/kopeio/kope
+export PATH=$PATH:~/upgrade/bin
+~```
 
 # Set the REGION env var to the region where your cluster is
 REGION=us-west-2

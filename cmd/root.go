@@ -13,9 +13,9 @@ var cfgFile string
 
 // This represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:   "kutil",
-	Short: "Kubernetes toolbelt",
-	Long: `Toolkit for Kubernetes`,
+	Use:   "kope",
+	Short: "Kubernetes admin toolbelt",
+	Long: `Toolkit for Kubernetes Administrators`,
 }
 
 func Execute() {
@@ -29,7 +29,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	RootCmd.PersistentFlags().AddGoFlagSet(goflag.CommandLine)
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.kutil.yaml)")
+	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.kope.yaml)")
 }
 
 func initConfig() {
@@ -37,7 +37,7 @@ func initConfig() {
 		viper.SetConfigFile(cfgFile)
 	}
 
-	viper.SetConfigName(".kutil")
+	viper.SetConfigName(".kope")
 	viper.AddConfigPath("$HOME")
 	viper.AutomaticEnv()
 

@@ -1,4 +1,4 @@
-package kutil
+package kopeutil
 
 import (
 	"fmt"
