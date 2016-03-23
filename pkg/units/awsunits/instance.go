@@ -75,6 +75,9 @@ func (e *Instance) find(c *fi.RunContext) (*Instance, error) {
 			actual.Name = tag.Value
 		}
 	}
+	if i.SubnetId != nil {
+		actual.Subnet = &Subnet{ID: i.SubnetId}
+	}
 	return actual, nil
 }
 
@@ -186,7 +189,7 @@ func (_*Instance) RenderAWS(t *fi.AWSAPITarget, a, e, changes *Instance) error {
 	return t.AddAWSTags(*e.ID, e.buildTags(t.Cloud))
 }
 
-	func (_*Instance) RenderBash(t *fi.BashTarget, a, e, changes *Instance) error {
+func (_*Instance) RenderBash(t *fi.BashTarget, a, e, changes *Instance) error {
 	t.CreateVar(e)
 	if a == nil {
 		glog.V(2).Infof("Creating Instance with Name:%q", *e.Name)

@@ -1,13 +1,13 @@
 
 To upgrade from 1.1 to 1.2
 
-go install github.com/kopeio/kope/installer/kutil
+go install github.com/kopeio/kope
 
 # Set the REGION env var to the region where your cluster is
 REGION=us-west-2
 
 # List all the clusters in ${REGION}
-> kutil discover clusters --region ${REGION}
+> kope discover clusters --region ${REGION}
 kubernetes	52.27.60.160	us-west-2a
 
 # The first column is your cluster ID (likely `kubernetes`)
@@ -24,8 +24,11 @@ kubectl get nodes -ojson | grep -A1 ExternalIP
 # Extract out one of the 'ExternalIP' values
 NODE_IP=1.2.3.4
 
+# Set ssh_key to the SSH key you're using with your cluster
+ssh_key=~/.ssh/kube_aws_rsa
+_
 # Extract the configuration and keys from your existing cluster
-kutil export cluster --master ${MASTER_IP} -i ${ssh_key} --logtostderr --node ${NODE_IP} --dest upgrade11/
+kope export cluster --master ${MASTER_IP} -i ${ssh_key} --logtostderr --node ${NODE_IP} --dest upgrade11/
 
 # This should have extracted keys & configuration from the running cluster:
 find upgrade11/
@@ -83,10 +86,68 @@ wget https://storage.googleapis.com/kubernetes-release/release/${release}/kubern
 tar zxf  release-${release}/kubernetes.tar.gz -C  release-${release}
 
 # See what changes will be made if we apply the cluster changes
-ssh_key=~/.ssh/kube_aws_rsa
-kutil create cluster -i ${ssh_key} -d upgrade11/ -r release-${release}/kubernetes/ --logtostderr --s3-bucket ${BUCKET} -t bash
+kope create cluster -i ${ssh_key} -d upgrade11/ -r release-${release}/kubernetes/ --logtostderr -t dryrun
 
 You should see something like this:
+
+```
+Upload resources:
+  bootstrap     1ff7f9b7f9596fe2224d4d4765c98161b89ba33d
+  server        289db0f893b47fc00461204dcdddef457def08b6
+  salt  eb4aa52f1b81223f36532acee17cefdef7232a24
+Created resources:
+  *awsunits.ElasticIP   ElasticIP-kubernetes.io/master-ip
+  *awsunits.InstanceElasticIPAttachment InstanceElasticIPAttachment-kubernetes-master-kubernetes.io/master-ip
+Changed resources:
+  *awsunits.IAMRole     IAMRole-kubernetes-master
+    RolePolicyDocument <resource> -> <resource>
+
+  *awsunits.IAMRolePolicy       IAMRolePolicy-kubernetes-master
+    Role id:kubernetes-master -> id:AROAILHQRUIC4GMMJFPZS
+    PolicyDocument <resource> -> <resource>
+
+  *awsunits.IAMRole     IAMRole-kubernetes-minion
+    RolePolicyDocument <resource> -> <resource>
+
+  *awsunits.IAMRolePolicy       IAMRolePolicy-kubernetes-minion
+    Role id:kubernetes-minion -> id:AROAJQYAOWIFBGC7M4J64
+    PolicyDocument <resource> -> <resource>
+
+  *awsunits.SSHKey      SSHKey-kubernetes-kubernetes
+    PublicKey <nil> -> <resource>
+
+  *awsunits.VPC VPC-kubernetes-kubernetes
+    Name <nil> -> kubernetes-kubernetes
+
+  *awsunits.Subnet      Subnet-kubernetes-kubernetes
+    Name <nil> -> kubernetes-kubernetes
+
+  *awsunits.InternetGateway     InternetGateway-kubernetes-kubernetes
+    Name <nil> -> kubernetes-kubernetes
+
+  *awsunits.SecurityGroup       SecurityGroup-kubernetes-master-kubernetes
+    Description Kubernetes security group applied to master nodes -> Security group for master nodes
+
+  *awsunits.SecurityGroup       SecurityGroup-kubernetes-minion-kubernetes
+    Description Kubernetes security group applied to minion nodes -> Security group for minion nodes
+
+  *awsunits.Instance    Instance-kubernetes-master
+    InstanceCommonConfig awsunits.InstanceCommonConfig ({<nil> <nil> <nil> [] <nil> [] <nil>}) -> awsunits.InstanceCommonConfig ({0xc82038e040 0xc82038e050 SSHKey (name=%!s(*string=0xc820467c30)) [0xc820226800] 0xc820467fe9 [0xc820467f10 0xc820467f60 0xc820467fc0 0xc82038e010] 0xc820373350})
+    UserData <nil> -> <resource>
+    Tags map[string]string (map[]) -> map[string]string (map[Role:master])
+
+  *awsunits.AutoscalingGroup    AutoscalingGroup-kubernetes-minion-group
+    InstanceCommonConfig awsunits.InstanceCommonConfig ({0xc8202b6028 0xc8204567a8 SSHKey (name=%!s(*string=0xc8204567f8)) [0xc820577700] 0xc82045ab78 [0xc82045b290 0xc82045b2b0 0xc82045b2e0 0xc82045b2f0 0xc82045b300] 0xc82043c5d0}) -> awsunits.InstanceCommonConfig ({0xc82038e090 0xc82038e0a0 SSHKey (name=%!s(*string=0xc820467c30)) [0xc8202268c0] 0xc82038e0b0 [0xc820467f10 0xc820467f60 0xc820467fc0 0xc82038e010] 0xc820373530})
+    UserData <resource> -> <resource>
+    Tags map[string]string (map[KubernetesCluster:kubernetes Name:kubernetes-minion Role:kubernetes-minion]) -> map[string]string (map[Role:node])
+
+```
+
+You may prefer the bash-view:
+
+```
+kope create cluster -i ${ssh_key} -d upgrade11/ -r release-${release}/kubernetes/ --logtostderr -t bash
+```
 
 ```
 #!/bin/bash
@@ -94,37 +155,35 @@ set -ex
 
 . ./helpers
 
-export AWS_DEFAULT_REGION="us-west-2"
 export AWS_DEFAULT_OUTPUT="text"
-PERSISTENTVOLUME_1="vol-f8adc40e"
+export AWS_DEFAULT_REGION="us-west-2"
+PERSISTENTVOLUME_1="vol-14355ee2"
 ELASTICIP_1=`aws ec2 allocate-address --domain vpc --query AllocationId`
 ELASTICIP_1_PUBLICIP=`aws ec2 describe-addresses --allocation-ids ${ELASTICIP_1} --query Addresses[].PublicIp`
 add-tag ${PERSISTENTVOLUME_1} kubernetes.io/master-ip ${ELASTICIP_1_PUBLICIP}
 IAMROLE_1="AROAILHQRUIC4GMMJFPZS"
 IAMROLE_2="AROAJQYAOWIFBGC7M4J64"
-aws ec2 import-key-pair --key-name kubernetes-kubernetes --public-key-material file://resources/StringResource_1
-VPC_1="vpc-a6d017c2"
+VPC_1="vpc-2373b447"
 add-tag ${VPC_1} "Name" "kubernetes-kubernetes"
 DHCPOPTIONS_1="dopt-54021936"
-add-tag ${DHCPOPTIONS_1} "Name" "kubernetes-kubernetes"
-add-tag ${DHCPOPTIONS_1} "KubernetesCluster" "kubernetes"
-SUBNET_1="subnet-7fac621b"
+SUBNET_1="subnet-0b3ff16f"
 add-tag ${SUBNET_1} "Name" "kubernetes-kubernetes"
-INTERNETGATEWAY_1="igw-91c2e7f4"
+INTERNETGATEWAY_1="igw-2c98bd49"
 add-tag ${INTERNETGATEWAY_1} "Name" "kubernetes-kubernetes"
 add-tag ${INTERNETGATEWAY_1} "KubernetesCluster" "kubernetes"
-ROUTETABLE_1="rtb-327ed956"
+ROUTETABLE_1="rtb-f1b51395"
 add-tag ${ROUTETABLE_1} "Name" "kubernetes-kubernetes"
-ROUTETABLEASSOCIATION_1="rtbassoc-249ae840"
-SECURITYGROUP_1="sg-d4debeb3"
+ROUTETABLEASSOCIATION_1="rtbassoc-6df78a09"
+SECURITYGROUP_1="sg-14670573"
 add-tag ${SECURITYGROUP_1} "Name" "kubernetes-master-kubernetes"
-SECURITYGROUP_2="sg-dfdebeb8"
+SECURITYGROUP_2="sg-1967057e"
 add-tag ${SECURITYGROUP_2} "Name" "kubernetes-minion-kubernetes"
-INSTANCE_1="i-8d247c4a"
+INSTANCE_1="i-82653e45"
 add-tag ${INSTANCE_1} "Role" "master"
 wait-for-instance-state ${INSTANCE_1} running
 aws ec2 associate-address --allocation-id ${ELASTICIP_1} --instance-id ${INSTANCE_1}
-
+aws autoscaling create-launch-configuration --launch-configuration-name kubernetes-minion-group-20160323T051336Z --image-id ami-7840ac18 --instance-type m3.medium --key-name kubernetes-kubernetes --associate-public-ip-address --block-device-mappings "[{\"DeviceName\":\"/dev/sdc\",\"VirtualName\":\"ephemeral0\"},{\"DeviceName\":\"/dev/sdd\",\"VirtualName\":\"ephemeral1\"},{\"DeviceName\":\"/dev/sde\",\"VirtualName\":\"ephemeral2\"},{\"DeviceName\":\"/dev/sdf\",\"VirtualName\":\"ephemeral3\"}]" --security-groups ${SECURITYGROUP_2} --iam-instance-profile kubernetes-minion --user-data file://bash_resources/NodeScript_1
+aws autoscaling update-auto-scaling-group --auto-scaling-group-name kubernetes-minion-group --launch-configuration-name kubernetes-minion-group-20160323T051336Z
 ```
 
 Mostly we are adding missing tags, but we are also creating an elastic ip if there isn't
@@ -145,7 +204,7 @@ ELASTICIP_1=`aws ec2 allocate-address --domain vpc --query AllocationId`
 ELASTICIP_1_PUBLICIP=`aws ec2 describe-addresses --allocation-ids ${ELASTICIP_1} --query Addresses[].PublicIp`
 ```
 
-Unfortunately the new Elastic IP will require a new certificate.
+Unfortunately the new Elastic IP will be a new IP address, and this will require a new certificate.
 
 Presuming that's right, we'll need to recreate all our keys, sadly.
 
@@ -162,17 +221,17 @@ Now comes the moment of truth.
 aws ec2 --region ${REGION} terminate-instances --instance-id i-8d247c4a
 
 # Reconfigure your cluster:
-kutil create cluster -i ${ssh_key} -d upgrade11/ -r release-${release}/kubernetes/ --logtostderr --s3-bucket ${BUCKET} -t direct
+kope create cluster -i ${ssh_key} -d upgrade11/ -r release-${release}/kubernetes/ --logtostderr -t direct
 
 # Now once again list your clusters; if you weren't using an elastic IP previously, a new one will have been allocated
-kutil discover clusters --region ${REGION}
+kope discover clusters --region ${REGION}
 
 MASTER_IP=52.34.179.39 # or whatever it shows
 
 
 # Now, if the IP address changed, this means your kubecfg is now pointing to an invalid IP
-# The kutil create kubecfg will update with a new configuration:
-kutil create kubecfg -i ${ssh_key} --master ${MASTER_IP}
+# The kope create kubecfg will update with a new configuration:
+kope create kubecfg -i ${ssh_key} --master ${MASTER_IP}
 
 
 # If you now try `kubectl get nodes`, you should connect but the certificates are still not fully updated.
@@ -197,9 +256,16 @@ ssh -i ${ssh_key} admin@${MASTER_IP} sudo rm -rf /tmp/ca
 ssh -i ${ssh_key} admin@${MASTER_IP} sudo systemctl restart docker
 
 # And then re-update the configuration:
-kutil create kubecfg -i ${ssh_key} --master ${MASTER_IP}
+kope create kubecfg -i ${ssh_key} --master ${MASTER_IP}
 
 
+# To get your nodes to the latest version, you will need to restart them
+# You can list them using:
+kubectl get nodes -ojson  | jq -r .items[].spec.externalID
 
-NEED TO DOCUMENT RESTARTIN OF ASG
+# Shut them down using:
 
+kubectl get nodes -ojson  | jq -r .items[].spec.externalID | xargs aws ec2 terminate-instances --instance-ids 
+
+# It is then fun to watch your nodes get removed and then (after a few minutes) come back
+watch kubectl get nodes

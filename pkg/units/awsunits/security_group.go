@@ -51,21 +51,19 @@ func (e *SecurityGroup) find(c *fi.RunContext) (*SecurityGroup, error) {
 	}
 	if response == nil || len(response.SecurityGroups) == 0 {
 		return nil, nil
-	} else {
-		if len(response.SecurityGroups) != 1 {
-			glog.Fatalf("found multiple SecurityGroups matching tags")
-		}
-		sg := response.SecurityGroups[0]
-		actual := &SecurityGroup{}
-		actual.ID = sg.GroupId
-		actual.Name = sg.GroupName
-		actual.Description = sg.Description
-		actual.VPC = &VPC{ID:sg.VpcId}
-		glog.V(2).Infof("found matching SecurityGroup %q", *actual.ID)
-		return actual, nil
 	}
 
-	return nil, nil
+	if len(response.SecurityGroups) != 1 {
+		return nil, fmt.Errorf("found multiple SecurityGroups matching tags")
+	}
+	sg := response.SecurityGroups[0]
+	actual := &SecurityGroup{}
+	actual.ID = sg.GroupId
+	actual.Name = sg.GroupName
+	actual.Description = sg.Description
+	actual.VPC = &VPC{ID:sg.VpcId}
+	glog.V(2).Infof("found matching SecurityGroup %q", *actual.ID)
+	return actual, nil
 }
 
 func (e *SecurityGroup) Run(c *fi.RunContext) error {

@@ -55,15 +55,23 @@ func (c *RunContext) Run() error {
 	return c.node.Run(c)
 }
 
-func (c*RunContext) Render(a, e, changes interface{}) error {
+func (c*RunContext) Render(a, e, changes Unit) error {
+	dryrun := false
+
 	var methodName string
 	switch c.Target.(type) {
 	case *AWSAPITarget:
 		methodName = "RenderAWS"
 	case *BashTarget:
 		methodName = "RenderBash"
+	case *DryRunTarget:
+		dryrun= true
 	default:
-		return fmt.Errorf("Unhandled target type: %v", c.Target)
+		return fmt.Errorf("Unhandled target type: %T", c.Target)
+	}
+
+	if dryrun {
+		return c.Target.(*DryRunTarget).Render(a, e, changes)
 	}
 
 	v := reflect.ValueOf(e)

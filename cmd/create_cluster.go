@@ -160,6 +160,7 @@ func (c*CreateClusterCmd) Run() error {
 
 	var target fi.Target
 	var bashTarget *fi.BashTarget
+	var dryRunTarget *fi.DryRunTarget
 
 	switch (c.Target) {
 	case "direct":
@@ -170,6 +171,12 @@ func (c*CreateClusterCmd) Run() error {
 			return err
 		}
 		target = bashTarget
+	case "dryrun":
+		dryRunTarget, err = fi.NewDryRunTarget()
+		if err != nil {
+			return err
+		}
+		target = dryRunTarget
 	default:
 		return fmt.Errorf("unsupported target type %q", c.Target)
 	}
@@ -198,9 +205,14 @@ func (c*CreateClusterCmd) Run() error {
 		if err != nil {
 			glog.Fatal("error building shell commands: %v", err)
 		}
+	} else if dryRunTarget != nil {
+		err = dryRunTarget.PrintReport(os.Stdout)
+		if err != nil {
+			glog.Fatal("error printing dry-run report: %v", err)
+		}
+	} else {
+		fmt.Printf("\n\nDone\n")
 	}
-
-	fmt.Printf("\n\nDone\n")
 	return nil
 }
 
@@ -224,14 +236,23 @@ func buildAWSBootstrapScript(releaseDir string) (string, error) {
 	}
 
 	var b bytes.Buffer
+	insertedAWS := false
 	for _, gceLine := range strings.Split(string(gceConfigure), "\n") {
-		if strings.Contains(gceLine, "AWS_OVERRIDE_HERE") {
+		if strings.HasPrefix(gceLine, "#+AWS_OVERRIDES_HERE") {
+			if insertedAWS {
+				return "", fmt.Errorf("Multiple AWS insertion point markers found in GCE script")
+			}
 			b.Write(awsConfigure)
 			b.Write(awsFormatDisks)
+			insertedAWS = true
 		} else {
 			b.WriteString(gceLine)
 			b.WriteString("\n")
 		}
+	}
+
+	if !insertedAWS {
+		return "", fmt.Errorf("AWS insertion point marker not found in GCE script")
 	}
 
 	return b.String(), nil

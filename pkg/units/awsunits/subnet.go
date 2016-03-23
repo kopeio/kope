@@ -54,6 +54,7 @@ func (e *Subnet) find(c *fi.RunContext) (*Subnet, error) {
 	actual.AvailabilityZone = subnet.AvailabilityZone
 	actual.VPC = &VPC{ID: subnet.VpcId}
 	actual.CIDR = subnet.CidrBlock
+	actual.Name = findNameTag(subnet.Tags)
 
 	glog.V(2).Infof("found matching subnet %q", *actual.ID)
 

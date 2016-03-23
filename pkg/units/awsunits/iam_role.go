@@ -39,6 +39,9 @@ func (e *IAMRole) find(c *fi.RunContext) (*IAMRole, error) {
 	actual := &IAMRole{}
 	actual.ID = r.RoleId
 	actual.Name = r.RoleName
+	if r.AssumeRolePolicyDocument != nil {
+		actual.RolePolicyDocument = fi.NewStringResource(*r.AssumeRolePolicyDocument)
+	}
 	glog.V(2).Infof("found matching IAMRole %q", *actual.ID)
 	return actual, nil
 }

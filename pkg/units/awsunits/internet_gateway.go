@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/golang/glog"
 	"github.com/kopeio/kope/pkg/fi"
+"github.com/aws/aws-sdk-go/aws"
 )
 
 type InternetGateway struct {
@@ -47,6 +48,8 @@ func (e *InternetGateway) find(c *fi.RunContext) (*InternetGateway, error) {
 	igw := response.InternetGateways[0]
 	actual := &InternetGateway{}
 	actual.ID = igw.InternetGatewayId
+	actual.Name = findNameTag(igw.Tags)
+
 	glog.V(2).Infof("found matching InternetGateway %q", *actual.ID)
 
 	return actual, nil
@@ -110,4 +113,13 @@ func (_*InternetGateway) RenderBash(t *fi.BashTarget, a, e, changes *InternetGat
 	}
 
 	return t.AddAWSTags(e, t.Cloud.BuildTags(e.Name))
+}
+
+func findNameTag(tags []*ec2.Tag) *string {
+	for _, tag := range tags {
+		if aws.StringValue(tag.Key) == "Name" {
+			return tag.Value
+		}
+	}
+	return nil
 }

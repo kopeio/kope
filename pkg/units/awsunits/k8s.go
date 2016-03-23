@@ -11,6 +11,9 @@ import (
 	"encoding/base64"
 	"gopkg.in/yaml.v2"
 	"encoding/json"
+	"crypto/md5"
+	"golang.org/x/crypto/ssh"
+"strings"
 )
 
 const (
@@ -39,11 +42,11 @@ type K8s struct {
 	MasterVolumeSize              *int
 	MasterVolumeType              string
 	MasterCIDR                    string
-	MasterRoleDocument fi.Resource
-	MasterRolePolicy fi.Resource
+	MasterRoleDocument            fi.Resource
+	MasterRolePolicy              fi.Resource
 
-	NodeRoleDocument fi.Resource
-	NodeRolePolicy fi.Resource
+	NodeRoleDocument              fi.Resource
+	NodeRolePolicy                fi.Resource
 
 	NodeCount                     int
 
@@ -635,7 +638,34 @@ func (k *K8s) Add(c *fi.BuildContext) {
 	}
 	c.Add(iamNodeInstanceProfileRole)
 
-	sshKey := &SSHKey{Name: String("kubernetes-" + clusterID), PublicKey: k.SSHPublicKey}
+	sshKey := &SSHKey{PublicKey: k.SSHPublicKey}
+	if sshKey.Name == nil && sshKey.PublicKey != nil {
+		sshPublicKeyAuth, err := fi.ResourceAsString(sshKey.PublicKey)
+		if err != nil {
+			glog.Exitf("error reading SSH public key: %v", err)
+		}
+
+		tokens := strings.Split(sshPublicKeyAuth, " ")
+		if len(tokens) < 2 {
+			glog.Exitf("error parsing SSH public key: %s", sshPublicKeyAuth)
+		}
+
+		sshPublicKeyBytes, err := base64.StdEncoding.DecodeString(tokens[1])
+		if len(tokens) < 2 {
+			glog.Exitf("error decoding SSH public key: %s", sshPublicKeyAuth)
+		}
+
+		// We don't technically need to parse and remarshal it, but it ensures the key is valid
+		sshPublicKey, err := ssh.ParsePublicKey(sshPublicKeyBytes)
+		if err != nil {
+			glog.Exitf("error parsing SSH public key: %v", err)
+		}
+
+		h := md5.Sum(sshPublicKey.Marshal())
+		sshKeyFingerprint := fmt.Sprintf("%x", h)
+		sshKey.Name = String("kubernetes-" + sshKeyFingerprint)
+
+	}
 	c.Add(sshKey)
 
 	vpc := &VPC{
