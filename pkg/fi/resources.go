@@ -7,6 +7,7 @@ import (
 	"os"
 	"encoding/hex"
 	"hash"
+	"encoding/base64"
 )
 
 type Resources interface {
@@ -124,6 +125,15 @@ func ResourceAsString(r Resource) (string, error) {
 	return buf.String(), nil
 }
 
+func ResourceAsBase64String(r Resource) (string, error) {
+	data, err := ResourceAsBytes(r)
+	if err != nil {
+		return "", err
+	}
+
+	return base64.StdEncoding.EncodeToString(data), nil
+}
+
 func ResourceAsBytes(r Resource) ([]byte, error) {
 	buf := new(bytes.Buffer)
 	err := CopyResource(buf, r)
@@ -189,6 +199,25 @@ func NewBytesResource(data []byte) *BytesResource {
 
 func (r *BytesResource) Open() (io.ReadSeeker, error) {
 	reader := bytes.NewReader([]byte(r.data))
+	return reader, nil
+}
+
+type FuncResource struct {
+	fn func() ([]byte, error)
+}
+
+var _ Resource = &FuncResource{}
+
+func NewFuncResource(fn func() ([]byte, error)) *FuncResource {
+	return &FuncResource{fn: fn}
+}
+
+func (r *FuncResource) Open() (io.ReadSeeker, error) {
+	data, err := r.fn()
+	if err != nil {
+		return nil, err
+	}
+	reader := bytes.NewReader(data)
 	return reader, nil
 }
 

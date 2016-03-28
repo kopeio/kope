@@ -81,7 +81,7 @@ func (e *RouteTableAssociation) Run(c *fi.RunContext) error {
 	}
 
 	changes := &RouteTableAssociation{}
-	changed := BuildChanges(a, e, changes)
+	changed := fi.BuildChanges(a, e, changes)
 	if !changed {
 		return nil
 	}
@@ -97,10 +97,10 @@ func (e *RouteTableAssociation) Run(c *fi.RunContext) error {
 func (s *RouteTableAssociation) checkChanges(a, e, changes *RouteTableAssociation) error {
 	if a != nil {
 		if changes.RouteTable != nil {
-			return InvalidChangeError("Cannot change RouteTableAssociation RouteTable", changes.RouteTable.ID, e.RouteTable.ID)
+			return fi.InvalidChangeError("Cannot change RouteTableAssociation RouteTable", changes.RouteTable.ID, e.RouteTable.ID)
 		}
 		if changes.Subnet != nil {
-			return InvalidChangeError("Cannot change RouteTableAssociation Subnet", changes.Subnet.ID, e.Subnet.ID)
+			return fi.InvalidChangeError("Cannot change RouteTableAssociation Subnet", changes.Subnet.ID, e.Subnet.ID)
 		}
 	}
 	return nil
@@ -110,12 +110,12 @@ func (_*RouteTableAssociation) RenderAWS(t *fi.AWSAPITarget, a, e, changes *Rout
 	if a == nil {
 		subnetID := e.Subnet.ID
 		if subnetID == nil {
-			return MissingValueError("Must specify Subnet for RouteTableAssociation create")
+			return fi.MissingValueError("Must specify Subnet for RouteTableAssociation create")
 		}
 
 		routeTableID := e.RouteTable.ID
 		if routeTableID == nil {
-			return MissingValueError("Must specify RouteTable for RouteTableAssociation create")
+			return fi.MissingValueError("Must specify RouteTable for RouteTableAssociation create")
 		}
 
 		glog.V(2).Infof("Creating RouteTableAssociation with RouteTable:%q Subnet:%q", *routeTableID, *subnetID)
@@ -145,7 +145,7 @@ func (_*RouteTableAssociation) RenderBash(t *fi.BashTarget, a, e, changes *Route
 
 		t.AddEC2Command("associate-route-table", "--route-table-id", routeTableID, "--subnet-id", subnetID)
 	} else {
-		t.AddAssignment(e, StringValue(a.ID))
+		t.AddAssignment(e, fi.StringValue(a.ID))
 	}
 
 	return nil // no tags

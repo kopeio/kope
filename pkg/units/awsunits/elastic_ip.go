@@ -5,8 +5,8 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/golang/glog"
-	"github.com/kopeio/kope/pkg/fi"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/kopeio/kope/pkg/fi"
 )
 
 type ElasticIP struct {
@@ -21,6 +21,8 @@ type ElasticIP struct {
 	TagOnResource fi.HasID
 }
 
+//var _ units.HasAddress = &ElasticIP{}
+
 func (e *ElasticIP) GetID() *string {
 	return e.ID
 }
@@ -30,12 +32,21 @@ func (e *ElasticIP) Key() string {
 }
 
 func (e *ElasticIP) String() string {
-	return JsonString(e)
+	return fi.JsonString(e)
 }
 
-func (e *ElasticIP) find(c *fi.RunContext) (*ElasticIP, error) {
-	cloud := c.Cloud().(*fi.AWSCloud)
+func (e*ElasticIP) FindAddress(c fi.Cloud) (*string, error) {
+	actual, err := e.find(c.(*fi.AWSCloud))
+	if err != nil {
+		return nil, fmt.Errorf("error querying for Master PublicIP: %v", err)
+	}
+	if actual == nil {
+		return nil, nil
+	}
+	return actual.PublicIP, nil
+}
 
+func (e *ElasticIP) find(cloud *fi.AWSCloud) (*ElasticIP, error) {
 	publicIP := e.PublicIP
 	allocationID := e.ID
 
@@ -97,7 +108,7 @@ func (e *ElasticIP) find(c *fi.RunContext) (*ElasticIP, error) {
 }
 
 func (e *ElasticIP) Run(c *fi.RunContext) error {
-	a, err := e.find(c)
+	a, err := e.find(c.Cloud().(*fi.AWSCloud))
 	if err != nil {
 		return err
 	}
@@ -112,7 +123,7 @@ func (e *ElasticIP) Run(c *fi.RunContext) error {
 	}
 
 	changes := &ElasticIP{}
-	changed := BuildChanges(a, e, changes)
+	changed := fi.BuildChanges(a, e, changes)
 	if !changed {
 		return nil
 	}
@@ -182,7 +193,7 @@ func (_*ElasticIP) RenderBash(t *fi.BashTarget, a, e, changes *ElasticIP) error 
 			"--domain", "vpc",
 			"--query", "AllocationId").AssignTo(e)
 	} else {
-		t.AddAssignment(e, StringValue(a.ID))
+		t.AddAssignment(e, fi.StringValue(a.ID))
 	}
 
 	if e.TagOnResource != nil && e.TagUsingKey != nil {

@@ -67,7 +67,7 @@ func (e *RouteTable) Run(c *fi.RunContext) error {
 	}
 
 	changes := &RouteTable{}
-	changed := BuildChanges(a, e, changes)
+	changed := fi.BuildChanges(a, e, changes)
 	if !changed {
 		return nil
 	}
@@ -83,7 +83,7 @@ func (e *RouteTable) Run(c *fi.RunContext) error {
 func (s *RouteTable) checkChanges(a, e, changes *RouteTable) error {
 	if a != nil {
 		if changes.VPC != nil && changes.VPC.ID != nil {
-			return InvalidChangeError("Cannot change RouteTable VPC", changes.VPC.ID, e.VPC.ID)
+			return fi.InvalidChangeError("Cannot change RouteTable VPC", changes.VPC.ID, e.VPC.ID)
 		}
 	}
 	return nil
@@ -93,7 +93,7 @@ func (_*RouteTable) RenderAWS(t *fi.AWSAPITarget, a, e, changes *RouteTable) err
 	if a == nil {
 		vpcID := e.VPC.ID
 		if vpcID == nil {
-			return MissingValueError("Must specify VPC for RouteTable create")
+			return fi.MissingValueError("Must specify VPC for RouteTable create")
 		}
 
 		glog.V(2).Infof("Creating RouteTable with VPC: %q", *vpcID)
@@ -122,7 +122,7 @@ func (_*RouteTable) RenderBash(t *fi.BashTarget, a, e, changes *RouteTable) erro
 
 		t.AddEC2Command("create-route-table", "--vpc-id", vpcID, "--query", "RouteTable.RouteTableId").AssignTo(e)
 	} else {
-		t.AddAssignment(e, StringValue(a.ID))
+		t.AddAssignment(e, fi.StringValue(a.ID))
 	}
 
 	return t.AddAWSTags(e, t.Cloud.BuildTags(e.Name))

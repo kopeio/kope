@@ -52,7 +52,7 @@ func (e *S3Bucket) Run(c *fi.RunContext) error {
 	}
 
 	changes := &S3Bucket{}
-	changed := BuildChanges(a, e, changes)
+	changed := fi.BuildChanges(a, e, changes)
 	if !changed {
 		return nil
 	}
@@ -68,10 +68,10 @@ func (e *S3Bucket) Run(c *fi.RunContext) error {
 func (s *S3Bucket) checkChanges(a, e, changes *S3Bucket) error {
 	if a != nil {
 		if e.Name == nil {
-			return MissingValueError("Name is required when creating S3Bucket")
+			return fi.MissingValueError("Name is required when creating S3Bucket")
 		}
 		if changes.Region != nil {
-			return InvalidChangeError("Cannot change region of existing S3Bucket", a.Region, e.Region)
+			return fi.InvalidChangeError("Cannot change region of existing S3Bucket", a.Region, e.Region)
 		}
 	}
 	return nil

@@ -66,7 +66,7 @@ func (e *InternetGateway) Run(c *fi.RunContext) error {
 	}
 
 	changes := &InternetGateway{}
-	changed := BuildChanges(a, e, changes)
+	changed := fi.BuildChanges(a, e, changes)
 	if !changed {
 		return nil
 	}
@@ -109,7 +109,7 @@ func (_*InternetGateway) RenderBash(t *fi.BashTarget, a, e, changes *InternetGat
 	if a == nil {
 		t.AddEC2Command("create-internet-gateway", "--query", "InternetGateway.InternetGatewayId").AssignTo(e)
 	} else {
-		t.AddAssignment(e, StringValue(a.ID))
+		t.AddAssignment(e, fi.StringValue(a.ID))
 	}
 
 	return t.AddAWSTags(e, t.Cloud.BuildTags(e.Name))

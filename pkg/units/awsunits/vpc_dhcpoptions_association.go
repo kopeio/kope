@@ -46,7 +46,7 @@ func (e *VPCDHCPOptionsAssociation) Run(c *fi.RunContext) error {
 	}
 
 	changes := &VPCDHCPOptionsAssociation{}
-	changed := BuildChanges(a, e, changes)
+	changed := fi.BuildChanges(a, e, changes)
 	if !changed {
 		return nil
 	}
@@ -62,7 +62,7 @@ func (e *VPCDHCPOptionsAssociation) Run(c *fi.RunContext) error {
 func (s *VPCDHCPOptionsAssociation) checkChanges(a, e, changes *VPCDHCPOptionsAssociation) error {
 	if a == nil {
 		if e.DHCPOptions == nil || e.VPC == nil {
-			return MissingValueError("Must specify VPC and DHCPOptions for VPCDHCPOptionsAssociation creation")
+			return fi.MissingValueError("Must specify VPC and DHCPOptions for VPCDHCPOptionsAssociation creation")
 		}
 	}
 	return nil

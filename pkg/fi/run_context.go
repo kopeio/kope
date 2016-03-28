@@ -4,6 +4,7 @@ import (
 	"github.com/golang/glog"
 	"reflect"
 	"fmt"
+	"strings"
 )
 
 type RunMode int
@@ -56,38 +57,51 @@ func (c *RunContext) Run() error {
 }
 
 func (c*RunContext) Render(a, e, changes Unit) error {
-	dryrun := false
-
-	var methodName string
-	switch c.Target.(type) {
-	case *AWSAPITarget:
-		methodName = "RenderAWS"
-	case *BashTarget:
-		methodName = "RenderBash"
-	case *DryRunTarget:
-		dryrun= true
-	default:
-		return fmt.Errorf("Unhandled target type: %T", c.Target)
-	}
-
-	if dryrun {
+	if _, ok := c.Target.(*DryRunTarget); ok {
 		return c.Target.(*DryRunTarget).Render(a, e, changes)
 	}
 
 	v := reflect.ValueOf(e)
 	vType := v.Type()
 
-	_, found := vType.MethodByName(methodName)
-	if !found {
-		return fmt.Errorf("Type does not support Render function %s: %T", methodName, v.Type())
+	targetType := reflect.ValueOf(c.Target).Type()
+
+	var renderer *reflect.Method
+	for i := 0; i < vType.NumMethod(); i++ {
+		method := vType.Method(i)
+		if !strings.HasPrefix(method.Name, "Render") {
+			continue
+		}
+		match := true
+		for j := 0; j < method.Type.NumIn(); j++ {
+			arg := method.Type.In(j)
+			if arg.ConvertibleTo(vType) {
+				continue
+			}
+			if arg.ConvertibleTo(targetType) {
+				continue
+			}
+			match = false
+			break
+		}
+		if match {
+			if renderer != nil {
+				return fmt.Errorf("Found multiple Render methods that could be invokved on %T", e)
+			}
+			renderer = &method
+		}
+
+	}
+	if renderer == nil {
+		return fmt.Errorf("Could not find Render method on type %T (target %T)", e, c.Target)
 	}
 	var args  []reflect.Value
 	args = append(args, reflect.ValueOf(c.Target))
 	args = append(args, reflect.ValueOf(a))
 	args = append(args, reflect.ValueOf(e))
 	args = append(args, reflect.ValueOf(changes))
-	glog.V(4).Infof("Calling method %s on %T", methodName, e)
-	m := v.MethodByName(methodName)
+	glog.V(4).Infof("Calling method %s on %T", renderer.Name, e)
+	m := v.MethodByName(renderer.Name)
 	rv := m.Call(args)
 	var rvErr error
 	if !rv[0].IsNil() {

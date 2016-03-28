@@ -45,7 +45,7 @@ func (e *InternetGatewayAttachment) find(c *fi.RunContext) (*InternetGatewayAtta
 
 	if len(response.InternetGateways) != 1 {
 		for _, ig := range response.InternetGateways {
-			glog.Infof("gateway: %v", DebugPrint(ig))
+			glog.Infof("gateway: %v", fi.DebugPrint(ig))
 		}
 		glog.Fatalf("found multiple InternetGatewayAttachments matching ID")
 	}
@@ -71,7 +71,7 @@ func (e *InternetGatewayAttachment) Run(c *fi.RunContext) error {
 	}
 
 	changes := &InternetGatewayAttachment{}
-	changed := BuildChanges(a, e, changes)
+	changed := fi.BuildChanges(a, e, changes)
 	if !changed {
 		return nil
 	}
@@ -88,7 +88,7 @@ func (s *InternetGatewayAttachment) checkChanges(a, e, changes *InternetGatewayA
 	if a != nil {
 		// TODO: I think we can change it; we just detach & attach
 		if changes.VPC != nil {
-			return InvalidChangeError("Cannot change InternetGatewayAttachment VPC", changes.VPC.ID, e.VPC.ID)
+			return fi.InvalidChangeError("Cannot change InternetGatewayAttachment VPC", changes.VPC.ID, e.VPC.ID)
 		}
 	}
 	return nil

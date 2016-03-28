@@ -62,7 +62,7 @@ func (e *InstanceVolumeAttachment) Run(c *fi.RunContext) error {
 	}
 
 	changes := &InstanceVolumeAttachment{}
-	changed := BuildChanges(a, e, changes)
+	changed := fi.BuildChanges(a, e, changes)
 	if !changed {
 		return nil
 	}
@@ -79,13 +79,13 @@ func (s *InstanceVolumeAttachment) checkChanges(a, e, changes *InstanceVolumeAtt
 	if a != nil {
 		if changes.Device != nil {
 			// TODO: Support this?
-			return InvalidChangeError("Cannot change InstanceVolumeAttachment Device", changes.Device, e.Device)
+			return fi.InvalidChangeError("Cannot change InstanceVolumeAttachment Device", changes.Device, e.Device)
 		}
 	}
 
 	if a == nil {
 		if e.Device == nil {
-			return MissingValueError("Must specify Device for InstanceVolumeAttachment create")
+			return fi.MissingValueError("Must specify Device for InstanceVolumeAttachment create")
 		}
 	}
 	return nil

@@ -106,7 +106,7 @@ func (e *VPC) Run(c *fi.RunContext) error {
 	}
 
 	changes := &VPC{}
-	changed := BuildChanges(a, e, changes)
+	changed := fi.BuildChanges(a, e, changes)
 	if !changed {
 		glog.V(2).Infof("No changes: %v", e)
 		return nil
@@ -119,7 +119,7 @@ func (_*VPC) RenderAWS(t *fi.AWSAPITarget, a, e, changes *VPC) error {
 	if a == nil {
 		if e.CIDR == nil {
 			// TODO: Auto-assign CIDR
-			return MissingValueError("Must specify CIDR for VPC create")
+			return fi.MissingValueError("Must specify CIDR for VPC create")
 		}
 
 		glog.V(2).Infof("Creating VPC with CIDR: %q", *e.CIDR)
@@ -136,7 +136,7 @@ func (_*VPC) RenderAWS(t *fi.AWSAPITarget, a, e, changes *VPC) error {
 	} else {
 		if changes.CIDR != nil {
 			// TODO: Do we want to destroy & recreate the CIDR?
-			return InvalidChangeError("VPC did not have the correct CIDR", changes.CIDR, e.CIDR)
+			return fi.InvalidChangeError("VPC did not have the correct CIDR", changes.CIDR, e.CIDR)
 		}
 		if e.ID == nil {
 			e.ID = a.ID
@@ -174,7 +174,7 @@ func (_*VPC) RenderBash(t *fi.BashTarget, a, e, changes *VPC) error {
 	if a == nil {
 		if e.CIDR == nil {
 			// TODO: Auto-assign CIDR
-			return MissingValueError("Must specify CIDR for VPC create")
+			return fi.MissingValueError("Must specify CIDR for VPC create")
 		}
 
 		glog.V(2).Infof("Creating VPC with CIDR: %q", *e.CIDR)
@@ -183,10 +183,10 @@ func (_*VPC) RenderBash(t *fi.BashTarget, a, e, changes *VPC) error {
 	} else {
 		if changes.CIDR != nil {
 			// TODO: Do we want to destroy & recreate the CIDR?
-			return InvalidChangeError("VPC did not have the correct CIDR", changes.CIDR, e.CIDR)
+			return fi.InvalidChangeError("VPC did not have the correct CIDR", changes.CIDR, e.CIDR)
 		}
 
-		t.AddAssignment(e, StringValue(a.ID))
+		t.AddAssignment(e, fi.StringValue(a.ID))
 	}
 
 	if changes.EnableDNSSupport != nil {

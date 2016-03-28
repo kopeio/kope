@@ -72,7 +72,7 @@ func (e *Subnet) Run(c *fi.RunContext) error {
 	}
 
 	changes := &Subnet{}
-	changed := BuildChanges(a, e, changes)
+	changed := fi.BuildChanges(a, e, changes)
 	if !changed {
 		return nil
 	}
@@ -89,15 +89,15 @@ func (s *Subnet) checkChanges(a, e, changes *Subnet) error {
 	if a != nil {
 		if changes.VPC != nil {
 			// TODO: Do we want to destroy & recreate the CIDR?
-			return InvalidChangeError("Cannot change subnet VPC", changes.VPC.ID, e.VPC.ID)
+			return fi.InvalidChangeError("Cannot change subnet VPC", changes.VPC.ID, e.VPC.ID)
 		}
 		if changes.AvailabilityZone != nil {
 			// TODO: Do we want to destroy & recreate the CIDR?
-			return InvalidChangeError("Cannot change subnet AvailabilityZone", changes.AvailabilityZone, e.AvailabilityZone)
+			return fi.InvalidChangeError("Cannot change subnet AvailabilityZone", changes.AvailabilityZone, e.AvailabilityZone)
 		}
 		if changes.CIDR != nil {
 			// TODO: Do we want to destroy & recreate the CIDR?
-			return InvalidChangeError("Cannot change subnet CIDR", changes.CIDR, e.CIDR)
+			return fi.InvalidChangeError("Cannot change subnet CIDR", changes.CIDR, e.CIDR)
 		}
 	}
 	return nil
@@ -107,7 +107,7 @@ func (_*Subnet) RenderAWS(t *fi.AWSAPITarget, a, e, changes *Subnet) error {
 	if a == nil {
 		if e.CIDR == nil {
 			// TODO: Auto-assign CIDR
-			return MissingValueError("Must specify CIDR for Subnet create")
+			return fi.MissingValueError("Must specify CIDR for Subnet create")
 		}
 
 		glog.V(2).Infof("Creating Subnet with CIDR: %q", *e.CIDR)
@@ -139,7 +139,7 @@ func (_*Subnet) RenderBash(t *fi.BashTarget, a, e, changes *Subnet) error {
 	if a == nil {
 		if e.CIDR == nil {
 			// TODO: Auto-assign CIDR
-			return MissingValueError("Must specify CIDR for Subnet create")
+			return fi.MissingValueError("Must specify CIDR for Subnet create")
 		}
 
 		vpcID := t.ReadVar(e.VPC)
@@ -151,7 +151,7 @@ func (_*Subnet) RenderBash(t *fi.BashTarget, a, e, changes *Subnet) error {
 
 		t.AddEC2Command(args...).AssignTo(e)
 	} else {
-		t.AddAssignment(e, StringValue(a.ID))
+		t.AddAssignment(e, fi.StringValue(a.ID))
 	}
 
 	return t.AddAWSTags(e, t.Cloud.BuildTags(e.Name))

@@ -110,7 +110,7 @@ func (e *AutoscalingGroup) Run(c *fi.RunContext) error {
 	}
 
 	changes := &AutoscalingGroup{}
-	changed := BuildChanges(a, e, changes)
+	changed := fi.BuildChanges(a, e, changes)
 	if !changed {
 		return nil
 	}
@@ -126,15 +126,15 @@ func (e *AutoscalingGroup) Run(c *fi.RunContext) error {
 func (s *AutoscalingGroup) checkChanges(a, e, changes *AutoscalingGroup) error {
 	if a != nil {
 		if e.Name == nil {
-			return MissingValueError("Name is required when creating AutoscalingGroup")
+			return fi.MissingValueError("Name is required when creating AutoscalingGroup")
 		}
 	}
 	return nil
 }
 
-func (e *AutoscalingGroup) buildTags(cloud *fi.AWSCloud) map[string]string {
+func (e *AutoscalingGroup) buildTags(cloud fi.Cloud) map[string]string {
 	tags := make(map[string]string)
-	for k, v := range cloud.BuildTags(e.Name) {
+	for k, v := range cloud.(*fi.AWSCloud).BuildTags(e.Name) {
 		tags[k] = v
 	}
 	for k, v := range e.Tags {

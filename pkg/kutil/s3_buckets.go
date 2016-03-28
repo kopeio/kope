@@ -7,6 +7,7 @@ import (
 	"strings"
 	"github.com/kopeio/kope/pkg/fi"
 	"os"
+	"github.com/kopeio/kope/pkg/fi/gce"
 )
 
 func GetDefaultS3Bucket(cloud *fi.AWSCloud) (string, error) {
@@ -25,4 +26,19 @@ func GetDefaultS3Bucket(cloud *fi.AWSCloud) (string, error) {
 	hashString := hex.EncodeToString(hash[:])
 	hashString = strings.ToLower(hashString)
 	return "kubernetes-staging-" + hashString, nil
+}
+
+func GetDefaultGCSBucket(cloud *gce.GCECloud, location string) (string, error) {
+	suffix := "-" + location
+	if suffix == "-us" {
+		suffix = ""
+	}
+	hasher := md5.New()
+	hasher.Write([]byte(cloud.Project))
+	hash := hasher.Sum(nil)
+	projectHash := hex.EncodeToString(hash[:])
+	projectHash = strings.ToLower(projectHash)
+
+	bucket := "kubernetes-staging-" + projectHash[0:10] + suffix
+	return bucket, nil
 }

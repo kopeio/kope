@@ -1,15 +1,11 @@
-package awsunits
+package fi
 
 import (
 	"reflect"
-	crypto_rand "crypto/rand"
 
 	"github.com/golang/glog"
 	"encoding/json"
 	"fmt"
-	"encoding/base64"
-	"bytes"
-	"github.com/kopeio/kope/pkg/fi"
 )
 
 func BuildChanges(a, e, changes interface{}) bool {
@@ -41,9 +37,18 @@ func BuildChanges(a, e, changes interface{}) bool {
 	}
 
 	for i := 0; i < ve.NumField(); i++ {
+		if t.Field(i).PkgPath != "" {
+			// unexported
+			continue
+		}
+
 		fve := ve.Field(i)
 		if fve.Kind() == reflect.Ptr && fve.IsNil() {
 			// No expected value means 'don't change'
+			continue
+		}
+
+		if ignoreField(fve) {
 			continue
 		}
 
@@ -69,10 +74,13 @@ func equalFieldValues(a, e reflect.Value) bool {
 	//	e = e.Elem()
 	//}
 
+	if a.Kind() == reflect.Map {
+		return equalMapValues(a, e)
+	}
 	if (a.Kind() == reflect.Ptr || a.Kind() == reflect.Interface) &&  !a.IsNil() {
-		aHasID, ok := a.Interface().(fi.HasID)
+		aHasID, ok := a.Interface().(HasID)
 		if ok && (e.Kind() == reflect.Ptr || e.Kind() == reflect.Interface) &&  !e.IsNil() {
-			eHasID, ok := e.Interface().(fi.HasID)
+			eHasID, ok := e.Interface().(HasID)
 			if ok {
 				aID := aHasID.GetID()
 				eID := eHasID.GetID()
@@ -82,11 +90,11 @@ func equalFieldValues(a, e reflect.Value) bool {
 			}
 		}
 
-		aResource, ok := a.Interface().(fi.Resource)
+		aResource, ok := a.Interface().(Resource)
 		if ok && (e.Kind() == reflect.Ptr || e.Kind() == reflect.Interface) && !e.IsNil() {
-			eResource, ok := e.Interface().(fi.Resource)
+			eResource, ok := e.Interface().(Resource)
 			if ok {
-				same, err := fi.ResourcesMatch(aResource, eResource)
+				same, err := ResourcesMatch(aResource, eResource)
 				if err != nil {
 					glog.Fatalf("error while comparing resources: %v", err)
 				} else {
@@ -106,6 +114,40 @@ func equalFieldValues(a, e reflect.Value) bool {
 	return false
 }
 
+func equalMapValues(a, e reflect.Value) bool {
+	if a.IsNil() != e.IsNil() {
+		return false
+	}
+	if a.IsNil() && e.IsNil() {
+		return true
+	}
+	if a.Len() != e.Len() {
+		return false
+	}
+	for _, k := range a.MapKeys() {
+		valA := a.MapIndex(k)
+		valE := e.MapIndex(k)
+
+		glog.Infof("comparing maps: %v %v %v", k, valA, valE)
+
+		if !equalFieldValues(valA, valE) {
+			glog.Infof("unequals map value: %v %v %v", k, valA, valE)
+			return false
+		}
+	}
+	return true
+}
+
+func ignoreField(e reflect.Value) bool {
+	if e.Kind() == reflect.Struct {
+		_, ok := e.Addr().Interface().(*SimpleUnit)
+		if ok {
+			return true
+		}
+	}
+	return false
+}
+
 func StringValue(s *string) string {
 	if s == nil {
 		return ""
@@ -119,35 +161,6 @@ func JsonString(v interface{}) string {
 		return fmt.Sprintf("error marshalling: %v", err)
 	}
 	return string(data)
-}
-
-func RandomToken(length int) string {
-	// This is supposed to be the same algorithm as the old bash algorithm
-	// KUBELET_TOKEN=$(dd if=/dev/urandom bs=128 count=1 2>/dev/null | base64 | tr -d "=+/" | dd bs=32 count=1 2>/dev/null)
-	// KUBE_PROXY_TOKEN=$(dd if=/dev/urandom bs=128 count=1 2>/dev/null | base64 | tr -d "=+/" | dd bs=32 count=1 2>/dev/null)
-
-	for {
-		buffer := make([]byte, length * 4)
-		_, err := crypto_rand.Read(buffer)
-		if err != nil {
-			glog.Fatalf("error generating random token: %v", err)
-		}
-		s := base64.StdEncoding.EncodeToString(buffer)
-		var trimmed bytes.Buffer
-		for _, c := range s {
-			switch c {
-			case '=', '+', '/':
-				continue
-			default:
-				trimmed.WriteRune(c)
-			}
-		}
-
-		s = string(trimmed.Bytes())
-		if len(s) >= length {
-			return s[0:length]
-		}
-	}
 }
 
 func String(s string) *string {

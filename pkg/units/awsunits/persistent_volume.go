@@ -15,7 +15,7 @@ type PersistentVolume struct {
 	ID               *string
 	AvailabilityZone *string
 	VolumeType       *string
-	Size             *int64
+	SizeGB           *int64
 	Name             *string
 }
 
@@ -28,7 +28,7 @@ func (s *PersistentVolume) Key() string {
 }
 
 func (s *PersistentVolume) String() string {
-	return JsonString(s)
+	return fi.JsonString(s)
 }
 
 func (e *PersistentVolume) find(c *fi.RunContext) (*PersistentVolume, error) {
@@ -57,7 +57,7 @@ func (e *PersistentVolume) find(c *fi.RunContext) (*PersistentVolume, error) {
 	actual.ID = v.VolumeId
 	actual.AvailabilityZone = v.AvailabilityZone
 	actual.VolumeType = v.VolumeType
-	actual.Size = v.Size
+	actual.SizeGB = v.Size
 	actual.Name = e.Name
 	return actual, nil
 }
@@ -75,7 +75,7 @@ func (e *PersistentVolume) Run(c *fi.RunContext) error {
 	}
 
 	changes := &PersistentVolume{}
-	changed := BuildChanges(a, e, changes)
+	changed := fi.BuildChanges(a, e, changes)
 	if !changed {
 		return nil
 	}
@@ -91,12 +91,12 @@ func (e *PersistentVolume) Run(c *fi.RunContext) error {
 func (s *PersistentVolume) checkChanges(a, e, changes *PersistentVolume) error {
 	if a == nil {
 		if e.Name == nil {
-			return MissingValueError("Name must be specified when creating a PersistentVolume")
+			return fi.MissingValueError("Name must be specified when creating a PersistentVolume")
 		}
 	}
 	if a != nil {
 		if changes.ID != nil {
-			return InvalidChangeError("Cannot change PersistentVolume ID", changes.ID, e.ID)
+			return fi.InvalidChangeError("Cannot change PersistentVolume ID", changes.ID, e.ID)
 		}
 	}
 	return nil
@@ -107,7 +107,7 @@ func (_*PersistentVolume) RenderAWS(t *fi.AWSAPITarget, a, e, changes *Persisten
 		glog.V(2).Infof("Creating PersistentVolume with Name:%q", *e.Name)
 
 		request := &ec2.CreateVolumeInput{}
-		request.Size = e.Size
+		request.Size = e.SizeGB
 		request.AvailabilityZone = e.AvailabilityZone
 		request.VolumeType = e.VolumeType
 
@@ -130,10 +130,10 @@ func (_*PersistentVolume) RenderBash(t *fi.BashTarget, a, e, changes *Persistent
 		t.AddEC2Command("create-volume",
 			"--availability-zone", *e.AvailabilityZone,
 			"--volume-type", *e.VolumeType,
-			"--size", strconv.FormatInt(*e.Size, 10),
+			"--size", strconv.FormatInt(*e.SizeGB, 10),
 			"--query", "VolumeId").AssignTo(e)
 	} else {
-		t.AddAssignment(e, StringValue(a.ID))
+		t.AddAssignment(e, fi.StringValue(a.ID))
 	}
 
 	return t.AddAWSTags(e, t.Cloud.BuildTags(e.Name))

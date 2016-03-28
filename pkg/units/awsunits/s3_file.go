@@ -72,7 +72,7 @@ func (e *S3File) Run(c *fi.RunContext) error {
 	}
 
 	changes := &S3File{}
-	changed := BuildChanges(a, e, changes)
+	changed := fi.BuildChanges(a, e, changes)
 	if !changed {
 		return nil
 	}
@@ -88,7 +88,7 @@ func (e *S3File) Run(c *fi.RunContext) error {
 func (s *S3File) checkChanges(a, e, changes *S3File) error {
 	if a != nil {
 		if e.Key == nil {
-			return MissingValueError("Key is required when creating S3File")
+			return fi.MissingValueError("Key is required when creating S3File")
 		}
 	}
 	return nil

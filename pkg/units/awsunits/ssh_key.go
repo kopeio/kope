@@ -71,7 +71,7 @@ func (e *SSHKey) Run(c *fi.RunContext) error {
 	}
 
 	changes := &SSHKey{}
-	changed := BuildChanges(a, e, changes)
+	changed := fi.BuildChanges(a, e, changes)
 	if !changed {
 		return nil
 	}
@@ -87,7 +87,7 @@ func (e *SSHKey) Run(c *fi.RunContext) error {
 func (s *SSHKey) checkChanges(a, e, changes *SSHKey) error {
 	if a != nil {
 		if changes.Name != nil {
-			return InvalidChangeError("Cannot change SSHKey Name", changes.Name, e.Name)
+			return fi.InvalidChangeError("Cannot change SSHKey Name", changes.Name, e.Name)
 		}
 	}
 	return nil

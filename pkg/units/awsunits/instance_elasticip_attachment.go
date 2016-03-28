@@ -61,7 +61,7 @@ func (e *InstanceElasticIPAttachment) Run(c *fi.RunContext) error {
 	}
 
 	changes := &InstanceElasticIPAttachment{}
-	changed := BuildChanges(a, e, changes)
+	changed := fi.BuildChanges(a, e, changes)
 	if !changed {
 		return nil
 	}

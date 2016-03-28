@@ -27,7 +27,7 @@ func (s *DHCPOptions) Key() string {
 }
 
 func (s *DHCPOptions) String() string {
-	return JsonString(s)
+	return fi.JsonString(s)
 }
 
 func (e *DHCPOptions) find(c *fi.RunContext) (*DHCPOptions, error) {
@@ -91,7 +91,7 @@ func (e *DHCPOptions) Run(c *fi.RunContext) error {
 	}
 
 	changes := &DHCPOptions{}
-	changed := BuildChanges(a, e, changes)
+	changed := fi.BuildChanges(a, e, changes)
 	if !changed {
 		return nil
 	}
@@ -107,12 +107,12 @@ func (e *DHCPOptions) Run(c *fi.RunContext) error {
 func (s *DHCPOptions) checkChanges(a, e, changes *DHCPOptions) error {
 	if a == nil {
 		if e.Name == nil {
-			return MissingValueError("Name must be specified when creating a DHCPOptions")
+			return fi.MissingValueError("Name must be specified when creating a DHCPOptions")
 		}
 	}
 	if a != nil {
 		if changes.ID != nil {
-			return InvalidChangeError("Cannot change DHCPOptions ID", changes.ID, e.ID)
+			return fi.InvalidChangeError("Cannot change DHCPOptions ID", changes.ID, e.ID)
 		}
 	}
 	return nil
@@ -164,7 +164,7 @@ func (_*DHCPOptions) RenderBash(t *fi.BashTarget, a, e, changes *DHCPOptions) er
 		args = append(args, "--query", "DhcpOptions.DhcpOptionsId")
 		t.AddEC2Command(args...).AssignTo(e)
 	} else {
-		t.AddAssignment(e, StringValue(a.ID))
+		t.AddAssignment(e, fi.StringValue(a.ID))
 	}
 
 	return t.AddAWSTags(e, t.Cloud.BuildTags(e.Name))

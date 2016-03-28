@@ -73,7 +73,7 @@ func (e *Route) Run(c *fi.RunContext) error {
 	}
 
 	changes := &Route{}
-	changed := BuildChanges(a, e, changes)
+	changed := fi.BuildChanges(a, e, changes)
 	if !changed {
 		return nil
 	}
@@ -89,10 +89,10 @@ func (e *Route) Run(c *fi.RunContext) error {
 func (s *Route) checkChanges(a, e, changes *Route) error {
 	if a != nil {
 		if changes.RouteTable != nil {
-			return InvalidChangeError("Cannot change Route RouteTable", changes.RouteTable, e.RouteTable)
+			return fi.InvalidChangeError("Cannot change Route RouteTable", changes.RouteTable, e.RouteTable)
 		}
 		if changes.CIDR != nil {
-			return InvalidChangeError("Cannot change Route CIDR", changes.CIDR, e.CIDR)
+			return fi.InvalidChangeError("Cannot change Route CIDR", changes.CIDR, e.CIDR)
 		}
 	}
 	return nil
@@ -102,7 +102,7 @@ func (_*Route) RenderAWS(t *fi.AWSAPITarget, a, e, changes *Route) error {
 	if a == nil {
 		cidr := e.CIDR
 		if cidr == nil {
-			return MissingValueError("Must specify CIDR for Route create")
+			return fi.MissingValueError("Must specify CIDR for Route create")
 		}
 
 		var igwID *string
@@ -110,7 +110,7 @@ func (_*Route) RenderAWS(t *fi.AWSAPITarget, a, e, changes *Route) error {
 			igwID = e.InternetGateway.ID
 		}
 		if igwID == nil {
-			return MissingValueError("Must specify InternetGateway for Route create")
+			return fi.MissingValueError("Must specify InternetGateway for Route create")
 		}
 
 		var routeTableID *string
@@ -118,7 +118,7 @@ func (_*Route) RenderAWS(t *fi.AWSAPITarget, a, e, changes *Route) error {
 			routeTableID = e.RouteTable.ID
 		}
 		if routeTableID == nil {
-			return MissingValueError("Must specify RouteTable for Route create")
+			return fi.MissingValueError("Must specify RouteTable for Route create")
 		}
 
 		glog.V(2).Infof("Creating Route with RouteTable:%q CIDR:%q", *routeTableID, *cidr)
@@ -146,7 +146,7 @@ func (_*Route) RenderBash(t *fi.BashTarget, a, e, changes *Route) error {
 	if a == nil {
 		cidr := e.CIDR
 		if cidr == nil {
-			return MissingValueError("Must specify CIDR for Route create")
+			return fi.MissingValueError("Must specify CIDR for Route create")
 		}
 
 		t.AddEC2Command("create-route",

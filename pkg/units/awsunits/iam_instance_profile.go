@@ -53,7 +53,7 @@ func (e *IAMInstanceProfile) Run(c *fi.RunContext) error {
 	}
 
 	changes := &IAMInstanceProfile{}
-	changed := BuildChanges(a, e, changes)
+	changed := fi.BuildChanges(a, e, changes)
 	if !changed {
 		return nil
 	}
@@ -69,7 +69,7 @@ func (e *IAMInstanceProfile) Run(c *fi.RunContext) error {
 func (s *IAMInstanceProfile) checkChanges(a, e, changes *IAMInstanceProfile) error {
 	if a != nil {
 		if e.Name == nil {
-			return MissingValueError("Name is required when creating IAMInstanceProfile")
+			return fi.MissingValueError("Name is required when creating IAMInstanceProfile")
 		}
 	}
 	return nil

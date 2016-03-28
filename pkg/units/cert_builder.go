@@ -1,4 +1,4 @@
-package awsunits
+package units
 
 import (
 	"fmt"
@@ -9,14 +9,15 @@ import (
 	"github.com/golang/glog"
 	"crypto"
 	"net"
-	"github.com/aws/aws-sdk-go/aws"
 )
 
 type CertBuilder struct {
 	fi.SimpleUnit
 
+	// TODO: This is messy ... random dependencies, random write-backs...
 	Kubernetes *K8s
-	MasterIP   *ElasticIP
+	MasterIP   HasAddress
+	MasterName *string
 }
 
 func (c*CertBuilder) Key() string {
@@ -189,14 +190,14 @@ func (b *CertBuilder) Run(c *fi.RunContext) error {
 				return err
 			}
 			if b.MasterIP != nil {
-				actual, err := b.MasterIP.find(c)
+				ip, err := b.MasterIP.FindAddress(c.Cloud())
 				if err != nil {
-					return fmt.Errorf("error querying for Master PublicIP: %v", err)
+					return fmt.Errorf("error querying for MasterIP: %v", err)
 				}
-				if actual == nil || aws.StringValue(actual.PublicIP) == "" {
-					return fmt.Errorf("cannot build SANs for master cert until master Public IP is allocated: %v", err)
+				if fi.StringValue(ip) == "" {
+					return fmt.Errorf("cannot build SANs for master cert until master Public IP is allocated")
 				}
-				alternateNames = append(alternateNames, aws.StringValue(actual.PublicIP))
+				alternateNames = append(alternateNames, fi.StringValue(ip))
 			}
 			for _, san := range alternateNames {
 				if ip := net.ParseIP(san); ip != nil {

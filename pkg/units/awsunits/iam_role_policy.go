@@ -56,7 +56,7 @@ func (e *IAMRolePolicy) Run(c *fi.RunContext) error {
 	}
 
 	changes := &IAMRolePolicy{}
-	changed := BuildChanges(a, e, changes)
+	changed := fi.BuildChanges(a, e, changes)
 	if !changed {
 		return nil
 	}
@@ -72,7 +72,7 @@ func (e *IAMRolePolicy) Run(c *fi.RunContext) error {
 func (s *IAMRolePolicy) checkChanges(a, e, changes *IAMRolePolicy) error {
 	if a != nil {
 		if e.Name == nil {
-			return MissingValueError("Name is required when creating IAMRolePolicy")
+			return fi.MissingValueError("Name is required when creating IAMRolePolicy")
 		}
 	}
 	return nil

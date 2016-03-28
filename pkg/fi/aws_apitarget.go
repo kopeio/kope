@@ -57,11 +57,8 @@ func (t *AWSAPITarget) AddAWSTags(id string, expected map[string]string) error {
 	return nil
 }
 
-func (t *AWSAPITarget) PutResource(key string, r Resource, hashAlgorithm HashAlgorithm) (string, string, error) {
-	if r == nil {
-		glog.Fatalf("Attempt to put null resource for %q", key)
-	}
-	return t.filestore.PutResource(key, r, hashAlgorithm)
+func (t *AWSAPITarget) FileStore() FileStore {
+	return t.filestore
 }
 
 func (t *AWSAPITarget) WaitForInstanceRunning(instanceID string) (error) {

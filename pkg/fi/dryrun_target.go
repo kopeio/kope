@@ -3,10 +3,10 @@ package fi
 import (
 	"fmt"
 
-	"github.com/golang/glog"
 	"io"
 	"bytes"
 	"reflect"
+	"github.com/golang/glog"
 )
 
 type putResource struct {
@@ -24,17 +24,18 @@ type render struct {
 type DryRunTarget struct {
 	putResources map[string]*putResource
 	changes      []*render
+	filestore    *dryRunFilestore
 }
 
 var _ Target = &DryRunTarget{}
 
-func NewDryRunTarget() (*DryRunTarget, error) {
-	t := &DryRunTarget{}
-	t.putResources = make(map[string]*putResource)
-	return t, nil
+type dryRunFilestore struct {
+	target *DryRunTarget
 }
 
-func (t *DryRunTarget) PutResource(key string, r Resource, hashAlgorithm HashAlgorithm) (string, string, error) {
+
+
+func (t *dryRunFilestore) PutResource(key string, r Resource, hashAlgorithm HashAlgorithm) (string, string, error) {
 	if r == nil {
 		glog.Fatalf("Attempt to put null resource for %q", key)
 	}
@@ -43,12 +44,22 @@ func (t *DryRunTarget) PutResource(key string, r Resource, hashAlgorithm HashAlg
 	if err != nil {
 		return "", "", fmt.Errorf("error hashing resource %q: %v", key, err)
 	}
-	t.putResources[key + ":" + hash] = &putResource{
+	t.target.putResources[key + ":" + hash] = &putResource{
 		Key: key,
 		Hash: hash,
 	}
 
 	return url, hash, nil
+}
+
+
+var _ FileStore = &dryRunFilestore{}
+
+func NewDryRunTarget() (*DryRunTarget, error) {
+	t := &DryRunTarget{}
+	t.putResources = make(map[string]*putResource)
+	t.filestore = &dryRunFilestore{target: t}
+	return t, nil
 }
 
 func (t *DryRunTarget) Render(a, e, changes Unit) error {
@@ -62,6 +73,10 @@ func (t *DryRunTarget) Render(a, e, changes Unit) error {
 		changes: changes,
 	})
 	return nil
+}
+
+func (t *DryRunTarget) FileStore() FileStore {
+	return t.filestore
 }
 
 func (t*DryRunTarget) PrintReport(out io.Writer) error {
@@ -93,29 +108,37 @@ func (t*DryRunTarget) PrintReport(out io.Writer) error {
 
 			valC := reflect.ValueOf(r.changes)
 			valA := reflect.ValueOf(r.a)
+			valE := reflect.ValueOf(r.e)
 			if valC.Kind() == reflect.Ptr && !valC.IsNil() {
 				valC = valC.Elem()
 			}
 			if valA.Kind() == reflect.Ptr && !valA.IsNil() {
 				valA = valA.Elem()
 			}
+			if valE.Kind() == reflect.Ptr && !valE.IsNil() {
+				valE = valE.Elem()
+			}
 			if valC.Kind() == reflect.Struct {
 				for i := 0; i < valC.NumField(); i++ {
 					fieldValC := valC.Field(i)
-					if fieldValC.Kind() == reflect.Ptr && fieldValC.IsNil() {
+
+					if (fieldValC.Kind() == reflect.Ptr || fieldValC.Kind() == reflect.Slice || fieldValC.Kind() == reflect.Map) && fieldValC.IsNil() {
 						// No change
 						continue
 					}
+
+					fieldValE := valE.Field(i)
+
 					description := ""
 					ignored := false
-					if fieldValC.CanInterface() {
+					if fieldValE.CanInterface() {
 						fieldValA := valA.Field(i)
 
-						switch fieldValC.Interface().(type) {
+						switch fieldValE.Interface().(type) {
 						case SimpleUnit:
 							ignored = true
 						default:
-							description = fmt.Sprintf(" %v -> %v", asString(fieldValA), asString(fieldValC))
+							description = fmt.Sprintf(" %v -> %v", asString(fieldValA), asString(fieldValE))
 						}
 					}
 					if ignored {

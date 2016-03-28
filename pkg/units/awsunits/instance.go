@@ -92,7 +92,7 @@ func (e *Instance) Run(c *fi.RunContext) error {
 	}
 
 	changes := &Instance{}
-	changed := BuildChanges(a, e, changes)
+	changed := fi.BuildChanges(a, e, changes)
 	if !changed {
 		return nil
 	}
@@ -108,7 +108,7 @@ func (e *Instance) Run(c *fi.RunContext) error {
 func (s *Instance) checkChanges(a, e, changes *Instance) error {
 	if a != nil {
 		if e.Name == nil {
-			return MissingValueError("Name is required when creating Instance")
+			return fi.MissingValueError("Name is required when creating Instance")
 		}
 	}
 	return nil

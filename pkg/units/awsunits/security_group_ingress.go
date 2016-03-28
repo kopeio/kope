@@ -146,7 +146,7 @@ func (e *SecurityGroupIngress) Run(c *fi.RunContext) error {
 	}
 
 	changes := &SecurityGroupIngress{}
-	changed := BuildChanges(a, e, changes)
+	changed := fi.BuildChanges(a, e, changes)
 	if !changed {
 		return nil
 	}
@@ -162,7 +162,7 @@ func (e *SecurityGroupIngress) Run(c *fi.RunContext) error {
 func (s *SecurityGroupIngress) checkChanges(a, e, changes *SecurityGroupIngress) error {
 	if a == nil {
 		if e.SecurityGroup == nil {
-			return MissingValueError("Must specify SecurityGroup when creating SecurityGroupIngress")
+			return fi.MissingValueError("Must specify SecurityGroup when creating SecurityGroupIngress")
 		}
 	}
 	return nil

@@ -341,11 +341,8 @@ func (t *BashTarget) AddLocalResource(r Resource) (string, error) {
 	return path, nil
 }
 
-func (t *BashTarget) PutResource(key string, r Resource, hashAlgorithm HashAlgorithm) (string, string, error) {
-	if r == nil {
-		glog.Fatalf("Attempt to put null resource for %q", key)
-	}
-	return t.filestore.PutResource(key, r, hashAlgorithm)
+func (t *BashTarget) FileStore() FileStore {
+	return t.filestore
 }
 
 func (t *BashTarget) WaitForInstanceRunning(instance Unit) {

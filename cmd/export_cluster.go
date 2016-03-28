@@ -15,7 +15,7 @@ import (
 	"github.com/kopeio/kope/pkg/fi"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/kopeio/kope/pkg/units/awsunits"
+	"github.com/kopeio/kope/pkg/units"
 )
 
 type ExportClusterCmd struct {
@@ -88,7 +88,7 @@ func (c*ExportClusterCmd) Run() error {
 		return fmt.Errorf("cannot determine INSTANCE_PREFIX")
 	}
 
-	k8s := &awsunits.K8s{}
+	k8s := &units.K8s{}
 	k8s.CloudProvider = "aws"
 	k8s.ClusterID = instancePrefix
 
@@ -298,7 +298,7 @@ func parseInt(s string) (int, error) {
 	return int(n), nil
 }
 
-func writeConf(p string, k8s *awsunits.K8s) (error) {
+func writeConf(p string, k8s *units.K8s) (error) {
 	jsonBytes, err := json.Marshal(k8s)
 	if err != nil {
 		return fmt.Errorf("error serializing configuration (json write phase): %v", err)

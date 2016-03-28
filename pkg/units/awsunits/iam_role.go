@@ -57,7 +57,7 @@ func (e *IAMRole) Run(c *fi.RunContext) error {
 	}
 
 	changes := &IAMRole{}
-	changed := BuildChanges(a, e, changes)
+	changed := fi.BuildChanges(a, e, changes)
 	if !changed {
 		return nil
 	}
@@ -73,7 +73,7 @@ func (e *IAMRole) Run(c *fi.RunContext) error {
 func (s *IAMRole) checkChanges(a, e, changes *IAMRole) error {
 	if a != nil {
 		if e.Name == nil {
-			return MissingValueError("Name is required when creating IAMRole")
+			return fi.MissingValueError("Name is required when creating IAMRole")
 		}
 	}
 	return nil

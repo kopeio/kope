@@ -77,7 +77,7 @@ func (e *SecurityGroup) Run(c *fi.RunContext) error {
 	}
 
 	changes := &SecurityGroup{}
-	changed := BuildChanges(a, e, changes)
+	changed := fi.BuildChanges(a, e, changes)
 	if !changed {
 		return nil
 	}
@@ -93,13 +93,13 @@ func (e *SecurityGroup) Run(c *fi.RunContext) error {
 func (s *SecurityGroup) checkChanges(a, e, changes *SecurityGroup) error {
 	if a != nil {
 		if changes.ID != nil {
-			return InvalidChangeError("Cannot change SecurityGroup ID", changes.ID, e.ID)
+			return fi.InvalidChangeError("Cannot change SecurityGroup ID", changes.ID, e.ID)
 		}
 		if changes.Name != nil {
-			return InvalidChangeError("Cannot change SecurityGroup Name", changes.Name, e.Name)
+			return fi.InvalidChangeError("Cannot change SecurityGroup Name", changes.Name, e.Name)
 		}
 		if changes.VPC != nil {
-			return InvalidChangeError("Cannot change SecurityGroup VPC", changes.VPC, e.VPC)
+			return fi.InvalidChangeError("Cannot change SecurityGroup VPC", changes.VPC, e.VPC)
 		}
 	}
 	return nil
@@ -137,7 +137,7 @@ func (_*SecurityGroup) RenderBash(t *fi.BashTarget, a, e, changes *SecurityGroup
 			"--vpc-id", t.ReadVar(e.VPC),
 			"--query", "GroupId").AssignTo(e)
 	} else {
-		t.AddAssignment(e, StringValue(a.ID))
+		t.AddAssignment(e, fi.StringValue(a.ID))
 	}
 
 	return t.AddAWSTags(e, t.Cloud.BuildTags(e.Name))

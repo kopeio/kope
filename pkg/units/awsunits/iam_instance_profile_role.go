@@ -56,7 +56,7 @@ func (e *IAMInstanceProfileRole) Run(c *fi.RunContext) error {
 	}
 
 	changes := &IAMInstanceProfileRole{}
-	changed := BuildChanges(a, e, changes)
+	changed := fi.BuildChanges(a, e, changes)
 	if !changed {
 		return nil
 	}
@@ -72,10 +72,10 @@ func (e *IAMInstanceProfileRole) Run(c *fi.RunContext) error {
 func (s *IAMInstanceProfileRole) checkChanges(a, e, changes *IAMInstanceProfileRole) error {
 	if a != nil {
 		if e.Role == nil {
-			return MissingValueError("Role is required when creating IAMInstanceProfileRole")
+			return fi.MissingValueError("Role is required when creating IAMInstanceProfileRole")
 		}
 		if e.InstanceProfile == nil {
-			return MissingValueError("InstanceProfile is required when creating IAMInstanceProfileRole")
+			return fi.MissingValueError("InstanceProfile is required when creating IAMInstanceProfileRole")
 		}
 	}
 	return nil
