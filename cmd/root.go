@@ -1,9 +1,9 @@
 package cmd
 
 import (
+	goflag "flag"
 	"fmt"
 	"os"
-	goflag "flag"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -15,7 +15,7 @@ var cfgFile string
 var RootCmd = &cobra.Command{
 	Use:   "kope",
 	Short: "Kubernetes admin toolbelt",
-	Long: `Toolkit for Kubernetes Administrators`,
+	Long:  `Toolkit for Kubernetes Administrators`,
 }
 
 func Execute() {

@@ -1,13 +1,13 @@
 package kutil
 
 import (
-	"fmt"
 	"crypto/md5"
 	"encoding/hex"
-	"strings"
+	"fmt"
 	"github.com/kopeio/kope/pkg/fi"
-	"os"
 	"github.com/kopeio/kope/pkg/fi/gce"
+	"os"
+	"strings"
 )
 
 func GetDefaultS3Bucket(cloud *fi.AWSCloud) (string, error) {

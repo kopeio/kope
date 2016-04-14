@@ -3,10 +3,10 @@ package gceunits
 import (
 	"fmt"
 
-	"github.com/kopeio/kope/pkg/fi"
-	"google.golang.org/api/compute/v1"
 	"github.com/golang/glog"
+	"github.com/kopeio/kope/pkg/fi"
 	"github.com/kopeio/kope/pkg/fi/gce"
+	"google.golang.org/api/compute/v1"
 )
 
 type IPAddress struct {
@@ -15,7 +15,7 @@ type IPAddress struct {
 	Name    *string
 	Address *string
 
-	actual  *IPAddress
+	actual *IPAddress
 }
 
 func (s *IPAddress) Key() string {
@@ -43,7 +43,7 @@ func (e *IPAddress) find(cloud *gce.GCECloud) (*IPAddress, error) {
 	return actual, nil
 }
 
-func (e*IPAddress) FindAddress(cloud fi.Cloud) (*string, error) {
+func (e *IPAddress) FindAddress(cloud fi.Cloud) (*string, error) {
 	actual, err := e.find(cloud.(*gce.GCECloud))
 	if err != nil {
 		// TODO: Race here if the address isn't immediately created?
@@ -84,11 +84,11 @@ func (s *IPAddress) checkChanges(a, e, changes *IPAddress) error {
 	return nil
 }
 
-func (_*IPAddress) RenderGCE(t *gce.GCEAPITarget, a, e, changes *IPAddress) error {
+func (_ *IPAddress) RenderGCE(t *gce.GCEAPITarget, a, e, changes *IPAddress) error {
 	addr := &compute.Address{
-		Name: *e.Name,
+		Name:    *e.Name,
 		Address: fi.StringValue(e.Address),
-		Region: t.Cloud.Region,
+		Region:  t.Cloud.Region,
 	}
 
 	if a == nil {

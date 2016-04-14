@@ -1,9 +1,9 @@
 package awsunits
 
 import (
-	"github.com/kopeio/kope/pkg/fi"
-	"github.com/aws/aws-sdk-go/service/ec2"
 	"fmt"
+	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/kopeio/kope/pkg/fi"
 )
 
 type DistroJessie struct {
@@ -20,7 +20,7 @@ func (d *DistroJessie) GetImageID(c *fi.Context) (string, error) {
 	var filters []*ec2.Filter
 	filters = append(filters, fi.NewEC2Filter("name", awsImageName))
 	request := &ec2.DescribeImagesInput{
-		Owners: []*string{&owner},
+		Owners:  []*string{&owner},
 		Filters: filters,
 	}
 

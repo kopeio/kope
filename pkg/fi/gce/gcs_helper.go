@@ -44,8 +44,8 @@ func FindGCSBucketIfExists(service *storage.Service, name string) (*GCSBucket, e
 
 	bucket := &GCSBucket{
 		service: service,
-		Name: name,
-		meta: meta,
+		Name:    name,
+		meta:    meta,
 	}
 	return bucket, nil
 }
@@ -58,7 +58,7 @@ func EnsureGCSBucket(service *storage.Service, project string, name string, loca
 	if bucket == nil {
 		glog.V(2).Infof("Creating GCE bucket: %s", name)
 		request := &storage.Bucket{
-			Name: name,
+			Name:     name,
 			Location: location,
 		}
 		meta, err := service.Buckets.Insert(project, request).Do()
@@ -67,8 +67,8 @@ func EnsureGCSBucket(service *storage.Service, project string, name string, loca
 		}
 		bucket = &GCSBucket{
 			service: service,
-			Name : name,
-			meta: meta,
+			Name:    name,
+			meta:    meta,
 		}
 	}
 	return bucket, nil

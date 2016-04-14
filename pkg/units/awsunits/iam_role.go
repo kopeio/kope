@@ -3,9 +3,9 @@ package awsunits
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/golang/glog"
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/kopeio/kope/pkg/fi"
 )
 
@@ -79,7 +79,7 @@ func (s *IAMRole) checkChanges(a, e, changes *IAMRole) error {
 	return nil
 }
 
-func (_*IAMRole) RenderAWS(t *fi.AWSAPITarget, a, e, changes *IAMRole) error {
+func (_ *IAMRole) RenderAWS(t *fi.AWSAPITarget, a, e, changes *IAMRole) error {
 	if a == nil {
 		glog.V(2).Infof("Creating IAMRole with Name:%q", *e.Name)
 
@@ -103,7 +103,7 @@ func (_*IAMRole) RenderAWS(t *fi.AWSAPITarget, a, e, changes *IAMRole) error {
 	return nil //return output.AddAWSTags(cloud.Tags(), v, "vpc")
 }
 
-func (_*IAMRole) RenderBash(t *fi.BashTarget, a, e, changes *IAMRole) error {
+func (_ *IAMRole) RenderBash(t *fi.BashTarget, a, e, changes *IAMRole) error {
 	t.CreateVar(e)
 	if a == nil {
 		glog.V(2).Infof("Creating IAMRole with Name:%q", *e.Name)

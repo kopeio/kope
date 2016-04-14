@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/kopeio/kope/pkg/fi"
+	"github.com/kopeio/kope/pkg/fi/gce"
 	"google.golang.org/api/compute/v1"
 	"strings"
-	"github.com/kopeio/kope/pkg/fi/gce"
 )
 
 type FirewallRule struct {
@@ -41,7 +41,7 @@ func (e *FirewallRule) find(c *fi.RunContext) (*FirewallRule, error) {
 
 	actual := &FirewallRule{}
 	actual.Name = &r.Name
-	actual.Network = &Network{Name: fi.String(lastComponent(r.Network)) }
+	actual.Network = &Network{Name: fi.String(lastComponent(r.Network))}
 	actual.TargetTags = r.TargetTags
 	actual.SourceRanges = r.SourceRanges
 	actual.SourceTags = r.SourceTags
@@ -91,24 +91,24 @@ func parseFirewallAllowed(rule string) (*compute.FirewallAllowed, error) {
 		return o, nil
 	}
 
-	o.Ports = []string{tokens[1] }
+	o.Ports = []string{tokens[1]}
 	return o, nil
 }
 
-func serializeFirewallAllowed(r *compute.FirewallAllowed) (string) {
+func serializeFirewallAllowed(r *compute.FirewallAllowed) string {
 	if len(r.Ports) == 0 {
 		return r.IPProtocol
 	}
 
 	var tokens []string
 	for _, ports := range r.Ports {
-		tokens = append(tokens, r.IPProtocol + ":" + ports)
+		tokens = append(tokens, r.IPProtocol+":"+ports)
 	}
 
 	return strings.Join(tokens, ",")
 }
 
-func (_*FirewallRule) RenderGCE(t *gce.GCEAPITarget, a, e, changes *FirewallRule) error {
+func (_ *FirewallRule) RenderGCE(t *gce.GCEAPITarget, a, e, changes *FirewallRule) error {
 	var allowed []*compute.FirewallAllowed
 	if e.Allowed != nil {
 		for _, a := range e.Allowed {
@@ -120,12 +120,12 @@ func (_*FirewallRule) RenderGCE(t *gce.GCEAPITarget, a, e, changes *FirewallRule
 		}
 	}
 	firewall := &compute.Firewall{
-		Name: *e.Name,
-		Network: e.Network.URL(),
-		SourceTags: e.SourceTags,
+		Name:         *e.Name,
+		Network:      e.Network.URL(),
+		SourceTags:   e.SourceTags,
 		SourceRanges: e.SourceRanges,
-		TargetTags: e.TargetTags,
-		Allowed: allowed,
+		TargetTags:   e.TargetTags,
+		Allowed:      allowed,
 	}
 
 	if a == nil {

@@ -3,17 +3,17 @@ package awsunits
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/golang/glog"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/kopeio/kope/pkg/fi"
 )
 
 type SSHKey struct {
 	fi.SimpleUnit
 
-	Name        *string
-	PublicKey   fi.Resource
+	Name      *string
+	PublicKey fi.Resource
 
 	fingerprint *string
 }
@@ -93,7 +93,7 @@ func (s *SSHKey) checkChanges(a, e, changes *SSHKey) error {
 	return nil
 }
 
-func (_*SSHKey) RenderAWS(t *fi.AWSAPITarget, a, e, changes *SSHKey) error {
+func (_ *SSHKey) RenderAWS(t *fi.AWSAPITarget, a, e, changes *SSHKey) error {
 	if a == nil {
 		glog.V(2).Infof("Creating SSHKey with Name:%q", *e.Name)
 
@@ -118,7 +118,7 @@ func (_*SSHKey) RenderAWS(t *fi.AWSAPITarget, a, e, changes *SSHKey) error {
 	return nil //return output.AddAWSTags(cloud.Tags(), v, "vpc")
 }
 
-func (_*SSHKey) RenderBash(t *fi.BashTarget, a, e, changes *SSHKey) error {
+func (_ *SSHKey) RenderBash(t *fi.BashTarget, a, e, changes *SSHKey) error {
 	if a == nil {
 		glog.V(2).Infof("Creating SSHKey with Name:%q", *e.Name)
 
@@ -126,9 +126,8 @@ func (_*SSHKey) RenderBash(t *fi.BashTarget, a, e, changes *SSHKey) error {
 		if err != nil {
 			return err
 		}
-		t.AddEC2Command("import-key-pair", "--key-name", *e.Name, "--public-key-material", "file://" + file)
+		t.AddEC2Command("import-key-pair", "--key-name", *e.Name, "--public-key-material", "file://"+file)
 	}
 
 	return nil
 }
-

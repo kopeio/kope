@@ -3,18 +3,18 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
+	"bytes"
 	"github.com/golang/glog"
 	"github.com/kopeio/kope/pkg/fi"
-	"path"
-	"os"
-	"io/ioutil"
-	"golang.org/x/crypto/ssh"
-	"github.com/kopeio/kope/pkg/kutil"
-	"strings"
-	"bytes"
-	"github.com/kopeio/kope/pkg/units"
 	"github.com/kopeio/kope/pkg/fi/gce"
+	"github.com/kopeio/kope/pkg/kutil"
+	"github.com/kopeio/kope/pkg/units"
+	"github.com/spf13/cobra"
+	"golang.org/x/crypto/ssh"
+	"io/ioutil"
+	"os"
+	"path"
+	"strings"
 )
 
 type CreateClusterCmd struct {
@@ -36,8 +36,8 @@ func init() {
 	cmd := &cobra.Command{
 		Use:   "cluster",
 		Short: "Create cluster",
-		Long: `Creates a new k8s cluster.`,
-		Run: func(cmd *cobra.Command, args[]string) {
+		Long:  `Creates a new k8s cluster.`,
+		Run: func(cmd *cobra.Command, args []string) {
 			err := createCluster.Run()
 			if err != nil {
 				glog.Exitf("%v", err)
@@ -60,7 +60,7 @@ func init() {
 	cmd.Flags().StringVar(&createCluster.ClusterID, "cluster-id", "", "cluster id")
 }
 
-func (c*CreateClusterCmd) Run() error {
+func (c *CreateClusterCmd) Run() error {
 	k := &units.K8s{}
 	k.Init()
 
@@ -141,7 +141,7 @@ func (c*CreateClusterCmd) Run() error {
 			return fmt.Errorf("Invalid AZ: %v", az)
 		}
 
-		region := az[:len(az) - 1]
+		region := az[:len(az)-1]
 		if c.S3Region == "" {
 			c.S3Region = region
 		}
@@ -221,7 +221,6 @@ func (c*CreateClusterCmd) Run() error {
 		gcsPrefix := "devel/" + k.ClusterID + "/"
 		filestore = gce.NewGCSFileStore(s3Bucket, gcsPrefix)
 
-
 		serverBinaryTar := fi.NewFileResource(path.Join(c.ReleaseDir, "server/kubernetes-server-linux-amd64.tar.gz"))
 		k.ServerBinaryTar = fi.NewDownloadableFromResource(filestore, "kubernetes-server-linux-amd64", serverBinaryTar)
 		saltTar := fi.NewFileResource(path.Join(c.ReleaseDir, "server/kubernetes-salt.tar.gz"))
@@ -239,7 +238,7 @@ func (c*CreateClusterCmd) Run() error {
 	var bashTarget *fi.BashTarget
 	var dryRunTarget *fi.DryRunTarget
 
-	switch (c.Target) {
+	switch c.Target {
 	case "direct":
 		switch k.CloudProvider {
 		case "aws":

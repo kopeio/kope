@@ -1,13 +1,13 @@
 package units
 
 import (
-	"fmt"
-	"crypto/x509"
-	"github.com/kopeio/kope/pkg/fi"
 	"bytes"
-	"crypto/x509/pkix"
-	"github.com/golang/glog"
 	"crypto"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"fmt"
+	"github.com/golang/glog"
+	"github.com/kopeio/kope/pkg/fi"
 	"net"
 )
 
@@ -20,7 +20,7 @@ type CertBuilder struct {
 	MasterName *string
 }
 
-func (c*CertBuilder) Key() string {
+func (c *CertBuilder) Key() string {
 	return "certbuilder"
 }
 
@@ -37,7 +37,7 @@ func buildCertificateAlternateNames(k8s *K8s) ([]string, error) {
 	sans = append(sans, "kubernetes")
 	sans = append(sans, "kubernetes.default")
 	sans = append(sans, "kubernetes.default.svc")
-	sans = append(sans, "kubernetes.default.svc." + k8s.DNSDomain)
+	sans = append(sans, "kubernetes.default.svc."+k8s.DNSDomain)
 
 	if k8s.MasterName != "" {
 		sans = append(sans, k8s.MasterName)
@@ -90,9 +90,9 @@ func (b *CertBuilder) Run(c *fi.RunContext) error {
 
 		if kubecfgCert == nil {
 			template := &x509.Certificate{
-				Subject: *kubecfgSubject,
-				KeyUsage: x509.KeyUsageDigitalSignature,
-				ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth },
+				Subject:               *kubecfgSubject,
+				KeyUsage:              x509.KeyUsageDigitalSignature,
+				ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
 				BasicConstraintsValid: true,
 				IsCA: false,
 			}
@@ -134,9 +134,9 @@ func (b *CertBuilder) Run(c *fi.RunContext) error {
 
 		if kubeletCert == nil {
 			template := &x509.Certificate{
-				Subject: *kubeletSubject,
-				KeyUsage: x509.KeyUsageDigitalSignature,
-				ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth },
+				Subject:               *kubeletSubject,
+				KeyUsage:              x509.KeyUsageDigitalSignature,
+				ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
 				BasicConstraintsValid: true,
 				IsCA: false,
 			}
@@ -178,9 +178,9 @@ func (b *CertBuilder) Run(c *fi.RunContext) error {
 
 		if masterCert == nil {
 			template := &x509.Certificate{
-				Subject: *masterSubject,
-				KeyUsage: x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
-				ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth },
+				Subject:               *masterSubject,
+				KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
+				ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
 				BasicConstraintsValid: true,
 				IsCA: false,
 			}

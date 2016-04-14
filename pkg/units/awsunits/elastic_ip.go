@@ -3,17 +3,17 @@ package awsunits
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/golang/glog"
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/kopeio/kope/pkg/fi"
 )
 
 type ElasticIP struct {
 	fi.SimpleUnit
 
-	ID            *string
-	PublicIP      *string
+	ID       *string
+	PublicIP *string
 
 	// Because ElasticIPs don't supporting tagging (sadly), we instead tag on
 	// a different resource
@@ -35,7 +35,7 @@ func (e *ElasticIP) String() string {
 	return fi.JsonString(e)
 }
 
-func (e*ElasticIP) FindAddress(c fi.Cloud) (*string, error) {
+func (e *ElasticIP) FindAddress(c fi.Cloud) (*string, error) {
 	actual, err := e.find(c.(*fi.AWSCloud))
 	if err != nil {
 		return nil, fmt.Errorf("error querying for Master PublicIP: %v", err)
@@ -51,7 +51,7 @@ func (e *ElasticIP) find(cloud *fi.AWSCloud) (*ElasticIP, error) {
 	allocationID := e.ID
 
 	// Find via tag on foreign resource
-	if allocationID == nil && publicIP == nil && e.TagUsingKey != nil &&e.TagOnResource != nil &&  e.TagOnResource.GetID() != nil {
+	if allocationID == nil && publicIP == nil && e.TagUsingKey != nil && e.TagOnResource != nil && e.TagOnResource.GetID() != nil {
 		var filters []*ec2.Filter
 		filters = append(filters, fi.NewEC2Filter("key", *e.TagUsingKey))
 		filters = append(filters, fi.NewEC2Filter("resource-id", *e.TagOnResource.GetID()))
@@ -82,7 +82,7 @@ func (e *ElasticIP) find(cloud *fi.AWSCloud) (*ElasticIP, error) {
 		if allocationID != nil {
 			request.AllocationIds = []*string{allocationID}
 		} else if publicIP != nil {
-			request.Filters = []*ec2.Filter{fi.NewEC2Filter("public-ip", *publicIP) }
+			request.Filters = []*ec2.Filter{fi.NewEC2Filter("public-ip", *publicIP)}
 		}
 
 		response, err := cloud.EC2.DescribeAddresses(request)
@@ -140,7 +140,7 @@ func (s *ElasticIP) checkChanges(a, e, changes *ElasticIP) error {
 	return nil
 }
 
-func (_*ElasticIP) RenderAWS(t *fi.AWSAPITarget, a, e, changes *ElasticIP) error {
+func (_ *ElasticIP) RenderAWS(t *fi.AWSAPITarget, a, e, changes *ElasticIP) error {
 	var publicIP *string
 	var tagOnResourceID *string
 	if e.TagOnResource != nil {
@@ -180,7 +180,7 @@ func (_*ElasticIP) RenderAWS(t *fi.AWSAPITarget, a, e, changes *ElasticIP) error
 	return nil
 }
 
-func (_*ElasticIP) RenderBash(t *fi.BashTarget, a, e, changes *ElasticIP) error {
+func (_ *ElasticIP) RenderBash(t *fi.BashTarget, a, e, changes *ElasticIP) error {
 	t.CreateVar(e)
 	if a == nil {
 		if e.TagOnResource == nil || e.TagUsingKey == nil {
@@ -204,7 +204,7 @@ func (_*ElasticIP) RenderBash(t *fi.BashTarget, a, e, changes *ElasticIP) error 
 
 		if a != nil && a.PublicIP != nil {
 			tags := map[string]string{
-				*e.TagUsingKey:*a.PublicIP,
+				*e.TagUsingKey: *a.PublicIP,
 			}
 			err := t.AddAWSTags(tagOnUnit, tags)
 			if err != nil {

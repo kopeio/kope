@@ -75,7 +75,7 @@ func (s *IAMInstanceProfile) checkChanges(a, e, changes *IAMInstanceProfile) err
 	return nil
 }
 
-func (_*IAMInstanceProfile) RenderAWS(t *fi.AWSAPITarget, a, e, changes *IAMInstanceProfile) error {
+func (_ *IAMInstanceProfile) RenderAWS(t *fi.AWSAPITarget, a, e, changes *IAMInstanceProfile) error {
 	if a == nil {
 		glog.V(2).Infof("Creating IAMInstanceProfile with Name:%q", *e.Name)
 
@@ -93,7 +93,7 @@ func (_*IAMInstanceProfile) RenderAWS(t *fi.AWSAPITarget, a, e, changes *IAMInst
 	return nil //return output.AddAWSTags(cloud.Tags(), v, "vpc")
 }
 
-func (_*IAMInstanceProfile) RenderBash(t *fi.BashTarget, a, e, changes *IAMInstanceProfile) error {
+func (_ *IAMInstanceProfile) RenderBash(t *fi.BashTarget, a, e, changes *IAMInstanceProfile) error {
 	t.CreateVar(e)
 	if a == nil {
 		glog.V(2).Infof("Creating IAMInstanceProfile with Name:%q", *e.Name)

@@ -3,10 +3,10 @@ package awsunits
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/golang/glog"
 	"github.com/kopeio/kope/pkg/fi"
-	"github.com/aws/aws-sdk-go/aws"
 )
 
 type S3Bucket struct {
@@ -23,7 +23,7 @@ func (s *S3Bucket) Prefix() string {
 	return "S3Bucket"
 }
 
-func (e*S3Bucket) findBucketIfExists(c *fi.RunContext) (*fi.S3Bucket, error) {
+func (e *S3Bucket) findBucketIfExists(c *fi.RunContext) (*fi.S3Bucket, error) {
 	cloud := c.Cloud().(*fi.AWSCloud)
 
 	return cloud.S3.FindBucketIfExists(*e.Name)
@@ -77,7 +77,7 @@ func (s *S3Bucket) checkChanges(a, e, changes *S3Bucket) error {
 	return nil
 }
 
-func (_*S3Bucket) RenderAWS(t *fi.AWSAPITarget, a, e, changes *S3Bucket) error {
+func (_ *S3Bucket) RenderAWS(t *fi.AWSAPITarget, a, e, changes *S3Bucket) error {
 	if a == nil {
 		glog.V(2).Infof("Creating S3Bucket with Name:%q", *e.Name)
 
@@ -93,12 +93,12 @@ func (_*S3Bucket) RenderAWS(t *fi.AWSAPITarget, a, e, changes *S3Bucket) error {
 	return nil //return output.AddAWSTags(cloud.Tags(), v, "vpc")
 }
 
-func (_*S3Bucket) RenderBash(t *fi.BashTarget, a, e, changes *S3Bucket) error {
+func (_ *S3Bucket) RenderBash(t *fi.BashTarget, a, e, changes *S3Bucket) error {
 	if a == nil {
 		glog.V(2).Infof("Creating S3Bucket with Name:%q", *e.Name)
 
 		args := []string{"mb"}
-		args = append(args, "s3://" + *e.Name)
+		args = append(args, "s3://"+*e.Name)
 
 		t.AddS3Command(*e.Region, args...)
 	}

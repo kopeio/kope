@@ -1,17 +1,17 @@
 package fi
 
 import (
+	"bytes"
 	"crypto"
 	crypto_rand "crypto/rand"
-	"crypto/x509/pkix"
-	"crypto/x509"
-	"path"
-	"os"
-	"io/ioutil"
 	"crypto/rsa"
+	"crypto/x509"
+	"crypto/x509/pkix"
 	"fmt"
-	"bytes"
 	"github.com/golang/glog"
+	"io/ioutil"
+	"os"
+	"path"
 )
 
 type FilesystemCAStore struct {
@@ -59,14 +59,14 @@ func NewCAStore(basedir string) (CAStore, error) {
 	return c, nil
 }
 
-func (c*FilesystemCAStore) generateCACertificate() error {
+func (c *FilesystemCAStore) generateCACertificate() error {
 	subject := &pkix.Name{
 		CommonName: "kubernetes",
 	}
 	template := &x509.Certificate{
-		Subject: *subject,
-		KeyUsage: x509.KeyUsageCertSign | x509.KeyUsageCRLSign,
-		ExtKeyUsage: []x509.ExtKeyUsage{},
+		Subject:               *subject,
+		KeyUsage:              x509.KeyUsageCertSign | x509.KeyUsageCRLSign,
+		ExtKeyUsage:           []x509.ExtKeyUsage{},
 		BasicConstraintsValid: true,
 		IsCA: true,
 	}
@@ -104,7 +104,7 @@ func (c*FilesystemCAStore) generateCACertificate() error {
 	return nil
 }
 
-func (c*FilesystemCAStore) getSubjectKey(subject *pkix.Name) string {
+func (c *FilesystemCAStore) getSubjectKey(subject *pkix.Name) string {
 	seq := subject.ToRDNSequence()
 	var s bytes.Buffer
 	for _, rdnSet := range seq {
@@ -139,14 +139,14 @@ func (c*FilesystemCAStore) getSubjectKey(subject *pkix.Name) string {
 	return s.String()
 }
 
-func (c*FilesystemCAStore) buildCertificatePath(subject *pkix.Name) string {
+func (c *FilesystemCAStore) buildCertificatePath(subject *pkix.Name) string {
 	key := c.getSubjectKey(subject)
-	return path.Join(c.basedir, "issued", key + ".crt")
+	return path.Join(c.basedir, "issued", key+".crt")
 }
 
-func (c*FilesystemCAStore) buildPrivateKeyPath(subject *pkix.Name) string {
+func (c *FilesystemCAStore) buildPrivateKeyPath(subject *pkix.Name) string {
 	key := c.getSubjectKey(subject)
-	return path.Join(c.basedir, "private", key + ".key")
+	return path.Join(c.basedir, "private", key+".key")
 }
 
 func (c *FilesystemCAStore) GetCACert() (*Certificate, error) {
@@ -231,7 +231,7 @@ func (c *FilesystemCAStore) CreatePrivateKey(subject *pkix.Name) (crypto.Private
 	return privateKey, nil
 }
 
-func (c*FilesystemCAStore) storePrivateKey(privateKey crypto.PrivateKey, p string) error {
+func (c *FilesystemCAStore) storePrivateKey(privateKey crypto.PrivateKey, p string) error {
 	var data bytes.Buffer
 	err := WritePrivateKey(privateKey, &data)
 	if err != nil {
@@ -241,7 +241,7 @@ func (c*FilesystemCAStore) storePrivateKey(privateKey crypto.PrivateKey, p strin
 	return c.writeFile(data.Bytes(), p)
 }
 
-func (c*FilesystemCAStore) storeCertificate(cert *Certificate, p string) error {
+func (c *FilesystemCAStore) storeCertificate(cert *Certificate, p string) error {
 	var data bytes.Buffer
 	err := cert.WriteCertificate(&data)
 	if err != nil {
@@ -251,7 +251,7 @@ func (c*FilesystemCAStore) storeCertificate(cert *Certificate, p string) error {
 	return c.writeFile(data.Bytes(), p)
 }
 
-func (c*FilesystemCAStore) writeFile(data []byte, p string) error {
+func (c *FilesystemCAStore) writeFile(data []byte, p string) error {
 	// TODO: concurrency?
 	err := ioutil.WriteFile(p, data, 0600)
 	if err != nil {

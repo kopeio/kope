@@ -1,11 +1,11 @@
 package gce
 
 import (
-	"google.golang.org/api/compute/v1"
-	"golang.org/x/net/context"
 	"fmt"
-	"golang.org/x/oauth2/google"
 	"github.com/kopeio/kope/pkg/fi"
+	"golang.org/x/net/context"
+	"golang.org/x/oauth2/google"
+	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/storage/v1"
 )
 

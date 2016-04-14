@@ -1,8 +1,8 @@
 package gce
 
 import (
-	"strings"
 	"fmt"
+	"strings"
 )
 
 type GoogleCloudURL struct {
@@ -13,7 +13,7 @@ type GoogleCloudURL struct {
 	Zone    string
 }
 
-func (u*GoogleCloudURL) BuildURL() string {
+func (u *GoogleCloudURL) BuildURL() string {
 	url := "https://www.googleapis.com/compute/v1/"
 	if u.Project != "" {
 		url += "projects/" + u.Project + "/"

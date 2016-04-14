@@ -1,32 +1,32 @@
 package kutil
 
 import (
-	"os"
-	"path"
-	"os/exec"
 	"fmt"
 	"github.com/golang/glog"
+	"os"
+	"os/exec"
+	"path"
 	"strings"
 )
 
 type KubeconfigBuilder struct {
-	KubectlPath     string
-	KubeconfigPath  string
+	KubectlPath    string
+	KubeconfigPath string
 
-	KubeMasterIP    string
+	KubeMasterIP string
 
-	Context         string
+	Context string
 
 	KubeBearerToken string
 	KubeUser        string
 	KubePassword    string
 
-	CACert          string
-	KubecfgCert     string
-	KubecfgKey      string
+	CACert      string
+	KubecfgCert string
+	KubecfgKey  string
 }
 
-func (c*KubeconfigBuilder) Init() {
+func (c *KubeconfigBuilder) Init() {
 	c.KubectlPath = "kubectl" // default to in-path
 
 	kubeconfig := os.Getenv("KUBECONFIG")
@@ -52,7 +52,7 @@ func (c*KubeconfigBuilder) Init() {
 //#   KUBE_CERT
 //#   KUBE_KEY
 //#   CA_CERT
-func (c*KubeconfigBuilder)  CreateKubeconfig() error {
+func (c *KubeconfigBuilder) CreateKubeconfig() error {
 	if _, err := os.Stat(c.KubeconfigPath); os.IsNotExist(err) {
 		// mkdir -p $(dirname "${KUBECONFIG}")
 		err := os.MkdirAll(path.Dir(c.KubeconfigPath), 0700)
@@ -60,7 +60,7 @@ func (c*KubeconfigBuilder)  CreateKubeconfig() error {
 			return fmt.Errorf("error creating directories for %q: %v", c.KubeconfigPath, err)
 		}
 		// touch "${KUBECONFIG}"
-		f, err := os.OpenFile(c.KubeconfigPath, os.O_RDWR | os.O_CREATE, 0600)
+		f, err := os.OpenFile(c.KubeconfigPath, os.O_RDWR|os.O_CREATE, 0600)
 		if err != nil {
 			return fmt.Errorf("error creating config file %q: %v", c.KubeconfigPath, err)
 		}
@@ -70,27 +70,27 @@ func (c*KubeconfigBuilder)  CreateKubeconfig() error {
 	var clusterArgs []string
 
 	//"--server=${KUBE_SERVER:-https://${KUBE_MASTER_IP}}"
-	clusterArgs = append(clusterArgs, "--server=https://" + c.KubeMasterIP)
+	clusterArgs = append(clusterArgs, "--server=https://"+c.KubeMasterIP)
 
 	if c.CACert == "" {
 		clusterArgs = append(clusterArgs, "--insecure-skip-tls-verify=true")
 	} else {
-		clusterArgs = append(clusterArgs, "--certificate-authority=" + c.CACert)
+		clusterArgs = append(clusterArgs, "--certificate-authority="+c.CACert)
 		clusterArgs = append(clusterArgs, "--embed-certs=true")
 	}
 
 	var userArgs []string
 
 	if c.KubeBearerToken != "" {
-		userArgs = append(userArgs, "--token=" + c.KubeBearerToken)
+		userArgs = append(userArgs, "--token="+c.KubeBearerToken)
 	} else if c.KubeUser != "" && c.KubePassword != "" {
-		userArgs = append(userArgs, "--username=" + c.KubeUser)
-		userArgs = append(userArgs, "--password=" + c.KubePassword)
+		userArgs = append(userArgs, "--username="+c.KubeUser)
+		userArgs = append(userArgs, "--password="+c.KubePassword)
 	}
 
 	if c.KubecfgCert != "" && c.KubecfgKey != "" {
-		userArgs = append(userArgs, "--client-certificate=" + c.KubecfgCert)
-		userArgs = append(userArgs, "--client-key=" + c.KubecfgKey)
+		userArgs = append(userArgs, "--client-certificate="+c.KubecfgCert)
+		userArgs = append(userArgs, "--client-key="+c.KubecfgKey)
 		userArgs = append(userArgs, "--embed-certs=true")
 	}
 
@@ -110,11 +110,11 @@ func (c*KubeconfigBuilder)  CreateKubeconfig() error {
 		}
 	}
 
-	err = c.kubectl("config", "set-context", c.Context, "--cluster=" + c.Context, "--user=" + c.Context)
+	err = c.kubectl("config", "set-context", c.Context, "--cluster="+c.Context, "--user="+c.Context)
 	if err != nil {
 		return err
 	}
-	err = c.kubectl("config", "use-context", c.Context, "--cluster=" + c.Context, "--user=" + c.Context)
+	err = c.kubectl("config", "use-context", c.Context, "--cluster="+c.Context, "--user="+c.Context)
 	if err != nil {
 		return err
 	}
@@ -123,7 +123,7 @@ func (c*KubeconfigBuilder)  CreateKubeconfig() error {
 	// so that it is easy to discover the basic auth password for your cluster
 	// to use in a web browser.
 	if c.KubeBearerToken != "" && c.KubeUser != "" && c.KubePassword != "" {
-		err := c.kubectl("config", "set-credentials", c.Context + "-basic-auth", "--username=" + c.KubeUser, "--password=" + c.KubePassword)
+		err := c.kubectl("config", "set-credentials", c.Context+"-basic-auth", "--username="+c.KubeUser, "--password="+c.KubePassword)
 		if err != nil {
 			return err
 		}
@@ -133,7 +133,7 @@ func (c*KubeconfigBuilder)  CreateKubeconfig() error {
 	return nil
 }
 
-func (c*KubeconfigBuilder)  kubectl(args... string) error {
+func (c *KubeconfigBuilder) kubectl(args ...string) error {
 	cmd := exec.Command(c.KubectlPath, args...)
 	env := os.Environ()
 	env = append(env, fmt.Sprintf("KUBECONFIG=%s", c.KubeconfigPath))
@@ -150,4 +150,3 @@ func (c*KubeconfigBuilder)  kubectl(args... string) error {
 	glog.V(2).Info(string(output))
 	return nil
 }
-

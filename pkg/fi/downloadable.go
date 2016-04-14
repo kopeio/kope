@@ -11,11 +11,11 @@ type CloudDownloadable struct {
 	resource  Resource
 	key       string
 
-	url       string
-	hash      string
+	url  string
+	hash string
 }
 
-func NewDownloadableFromResource(filestore FileStore,  key string, resource Resource) *CloudDownloadable {
+func NewDownloadableFromResource(filestore FileStore, key string, resource Resource) *CloudDownloadable {
 	return &CloudDownloadable{filestore: filestore, resource: resource, key: key}
 }
 

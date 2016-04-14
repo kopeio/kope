@@ -24,8 +24,8 @@ type BashTarget struct {
 	prefixCounts         map[string]int
 	resourcePrefixCounts map[string]int
 
-	baseDir              string
-	resourcesDir         string
+	baseDir      string
+	resourcesDir string
 }
 
 var _ Target = &BashTarget{}
@@ -349,5 +349,3 @@ func (t *BashTarget) WaitForInstanceRunning(instance Unit) {
 	instanceID := t.ReadVar(instance)
 	t.AddBashCommand("wait-for-instance-state", instanceID, "running")
 }
-
-

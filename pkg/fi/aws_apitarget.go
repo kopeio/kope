@@ -16,9 +16,9 @@ type AWSAPITarget struct {
 
 var _ Target = &AWSAPITarget{}
 
-func NewAWSAPITarget(cloud*AWSCloud, filestore FileStore) *AWSAPITarget {
+func NewAWSAPITarget(cloud *AWSCloud, filestore FileStore) *AWSAPITarget {
 	return &AWSAPITarget{
-		Cloud: cloud,
+		Cloud:     cloud,
 		filestore: filestore,
 	}
 }
@@ -61,7 +61,7 @@ func (t *AWSAPITarget) FileStore() FileStore {
 	return t.filestore
 }
 
-func (t *AWSAPITarget) WaitForInstanceRunning(instanceID string) (error) {
+func (t *AWSAPITarget) WaitForInstanceRunning(instanceID string) error {
 	attempt := 0
 	for {
 		instance, err := t.Cloud.DescribeInstance(instanceID)
@@ -90,4 +90,3 @@ func (t *AWSAPITarget) WaitForInstanceRunning(instanceID string) (error) {
 		}
 	}
 }
-

@@ -31,7 +31,7 @@ func (e *Subnet) find(c *fi.RunContext) (*Subnet, error) {
 
 	request := &ec2.DescribeSubnetsInput{}
 	if e.ID != nil {
-		request.SubnetIds = []*string{e.ID }
+		request.SubnetIds = []*string{e.ID}
 	} else {
 		request.Filters = cloud.BuildFilters(e.Name)
 	}
@@ -103,7 +103,7 @@ func (s *Subnet) checkChanges(a, e, changes *Subnet) error {
 	return nil
 }
 
-func (_*Subnet) RenderAWS(t *fi.AWSAPITarget, a, e, changes *Subnet) error {
+func (_ *Subnet) RenderAWS(t *fi.AWSAPITarget, a, e, changes *Subnet) error {
 	if a == nil {
 		if e.CIDR == nil {
 			// TODO: Auto-assign CIDR
@@ -134,7 +134,7 @@ func (_*Subnet) RenderAWS(t *fi.AWSAPITarget, a, e, changes *Subnet) error {
 	return t.AddAWSTags(*e.ID, t.Cloud.BuildTags(e.Name))
 }
 
-func (_*Subnet) RenderBash(t *fi.BashTarget, a, e, changes *Subnet) error {
+func (_ *Subnet) RenderBash(t *fi.BashTarget, a, e, changes *Subnet) error {
 	t.CreateVar(e)
 	if a == nil {
 		if e.CIDR == nil {

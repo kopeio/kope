@@ -1,19 +1,19 @@
 package fi
 
 import (
-	"hash"
 	"crypto/md5"
+	"crypto/sha1"
 	"crypto/sha256"
 	"github.com/golang/glog"
-	"crypto/sha1"
+	"hash"
 )
 
-type  HashAlgorithm string
+type HashAlgorithm string
 
 const (
 	HashAlgorithmSHA256 = "sha256"
-	HashAlgorithmSHA1 = "sha1"
-	HashAlgorithmMD5 = "md5"
+	HashAlgorithmSHA1   = "sha1"
+	HashAlgorithmMD5    = "md5"
 )
 
 func NewHasher(hashAlgorithm HashAlgorithm) hash.Hash {

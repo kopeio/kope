@@ -16,8 +16,8 @@ func NewS3FileStore(bucket *S3Bucket, prefix string) *S3FileStore {
 	}
 }
 
-func (s*S3FileStore) PutResource(key string, r Resource, hashAlgorithm HashAlgorithm) (string, string, error) {
-	hashes, err := HashesForResource(r, []HashAlgorithm{HashAlgorithmMD5, hashAlgorithm })
+func (s *S3FileStore) PutResource(key string, r Resource, hashAlgorithm HashAlgorithm) (string, string, error) {
+	hashes, err := HashesForResource(r, []HashAlgorithm{HashAlgorithmMD5, hashAlgorithm})
 	if err != nil {
 		return "", "", err
 	}

@@ -48,9 +48,9 @@ func (e *InstanceElasticIPAttachment) find(c *fi.RunContext) (*InstanceElasticIP
 	a := response.Addresses[0]
 	actual := &InstanceElasticIPAttachment{}
 	if a.InstanceId != nil {
-		actual.Instance = &Instance{ID: a.InstanceId }
+		actual.Instance = &Instance{ID: a.InstanceId}
 	}
-	actual.ElasticIP = &ElasticIP{ID: a.AllocationId }
+	actual.ElasticIP = &ElasticIP{ID: a.AllocationId}
 	return actual, nil
 }
 
@@ -78,7 +78,7 @@ func (s *InstanceElasticIPAttachment) checkChanges(a, e, changes *InstanceElasti
 	return nil
 }
 
-func (_*InstanceElasticIPAttachment) RenderAWS(t *fi.AWSAPITarget, a, e, changes *InstanceElasticIPAttachment) error {
+func (_ *InstanceElasticIPAttachment) RenderAWS(t *fi.AWSAPITarget, a, e, changes *InstanceElasticIPAttachment) error {
 	if changes.Instance != nil {
 		err := t.WaitForInstanceRunning(*e.Instance.ID)
 		if err != nil {
@@ -98,7 +98,7 @@ func (_*InstanceElasticIPAttachment) RenderAWS(t *fi.AWSAPITarget, a, e, changes
 	return nil // no tags
 }
 
-func (_*InstanceElasticIPAttachment) RenderBash(t *fi.BashTarget, a, e, changes *InstanceElasticIPAttachment) error {
+func (_ *InstanceElasticIPAttachment) RenderBash(t *fi.BashTarget, a, e, changes *InstanceElasticIPAttachment) error {
 	//t.CreateVar(e)
 	if a == nil {
 		t.WaitForInstanceRunning(e.Instance)

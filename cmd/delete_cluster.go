@@ -3,10 +3,10 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
 	"github.com/golang/glog"
 	"github.com/kopeio/kope/pkg/fi"
 	"github.com/kopeio/kope/pkg/kutil"
+	"github.com/spf13/cobra"
 	"time"
 )
 
@@ -22,8 +22,8 @@ func init() {
 	cmd := &cobra.Command{
 		Use:   "cluster",
 		Short: "Delete cluster",
-		Long: `Deletes a k8s cluster.`,
-		Run: func(cmd *cobra.Command, args[]string) {
+		Long:  `Deletes a k8s cluster.`,
+		Run: func(cmd *cobra.Command, args []string) {
 			err := deleteCluster.Run()
 			if err != nil {
 				glog.Exitf("%v", err)
@@ -39,7 +39,7 @@ func init() {
 	cmd.Flags().StringVar(&deleteCluster.Zone, "zone", "", "zone")
 }
 
-func (c*DeleteClusterCmd) Run() error {
+func (c *DeleteClusterCmd) Run() error {
 	if c.Zone == "" {
 		return fmt.Errorf("--zone is required")
 	}
@@ -51,7 +51,7 @@ func (c*DeleteClusterCmd) Run() error {
 	if len(az) <= 2 {
 		return fmt.Errorf("Invalid AZ: ", az)
 	}
-	region := az[:len(az) - 1]
+	region := az[:len(az)-1]
 
 	tags := map[string]string{"KubernetesCluster": c.ClusterID}
 	cloud := fi.NewAWSCloud(region, tags)

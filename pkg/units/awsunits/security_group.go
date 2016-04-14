@@ -61,7 +61,7 @@ func (e *SecurityGroup) find(c *fi.RunContext) (*SecurityGroup, error) {
 	actual.ID = sg.GroupId
 	actual.Name = sg.GroupName
 	actual.Description = sg.Description
-	actual.VPC = &VPC{ID:sg.VpcId}
+	actual.VPC = &VPC{ID: sg.VpcId}
 	glog.V(2).Infof("found matching SecurityGroup %q", *actual.ID)
 	return actual, nil
 }
@@ -105,7 +105,7 @@ func (s *SecurityGroup) checkChanges(a, e, changes *SecurityGroup) error {
 	return nil
 }
 
-func (_*SecurityGroup) RenderAWS(t *fi.AWSAPITarget, a, e, changes *SecurityGroup) error {
+func (_ *SecurityGroup) RenderAWS(t *fi.AWSAPITarget, a, e, changes *SecurityGroup) error {
 	if a == nil {
 		vpcID := e.VPC.ID
 
@@ -127,7 +127,7 @@ func (_*SecurityGroup) RenderAWS(t *fi.AWSAPITarget, a, e, changes *SecurityGrou
 	return t.AddAWSTags(*e.ID, t.Cloud.BuildTags(e.Name))
 }
 
-func (_*SecurityGroup) RenderBash(t *fi.BashTarget, a, e, changes *SecurityGroup) error {
+func (_ *SecurityGroup) RenderBash(t *fi.BashTarget, a, e, changes *SecurityGroup) error {
 	t.CreateVar(e)
 	if a == nil {
 		glog.V(2).Infof("Creating SecurityGroup with Name:%q", *e.Name)

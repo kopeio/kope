@@ -3,15 +3,15 @@ package fi
 import (
 	"bytes"
 	"fmt"
+	"github.com/golang/glog"
 	"io"
 	"io/ioutil"
 	"os"
-	"github.com/golang/glog"
 )
 
 func ReadersEqual(l, r io.Reader) (bool, error) {
-	lBuf := make([]byte, 32 * 1024)
-	rBuf := make([]byte, 32 * 1024)
+	lBuf := make([]byte, 32*1024)
+	rBuf := make([]byte, 32*1024)
 
 	for {
 		nL, err := io.ReadFull(l, lBuf)

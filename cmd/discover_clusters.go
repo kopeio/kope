@@ -3,10 +3,10 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
 	"github.com/golang/glog"
 	"github.com/kopeio/kope/pkg/fi"
 	"github.com/kopeio/kope/pkg/kutil"
+	"github.com/spf13/cobra"
 )
 
 type DiscoverClustersCmd struct {
@@ -20,8 +20,8 @@ func init() {
 	cmd := &cobra.Command{
 		Use:   "clusters",
 		Short: "Discover clusters",
-		Long: `Discover k8s cluster.`,
-		Run: func(cmd *cobra.Command, args[]string) {
+		Long:  `Discover k8s cluster.`,
+		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) != 0 {
 				if len(args) == 1 {
 					discoverClusters.ClusterID = args[0]
@@ -41,7 +41,7 @@ func init() {
 	cmd.Flags().StringVar(&discoverClusters.Region, "region", "", "region")
 }
 
-func (c*DiscoverClustersCmd) Run() error {
+func (c *DiscoverClustersCmd) Run() error {
 	if c.Region == "" {
 		return fmt.Errorf("--region is required")
 	}

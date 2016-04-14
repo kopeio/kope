@@ -11,7 +11,7 @@ type GCSBucket struct {
 	meta    *storage.Bucket
 }
 
-func (b*GCSBucket) FindObjectIfExists(key string) (*GCSObject, error) {
+func (b *GCSBucket) FindObjectIfExists(key string) (*GCSObject, error) {
 	object, err := b.service.Objects.Get(b.Name, key).Do()
 	if err != nil {
 		if IsNotFound(err) {
@@ -22,10 +22,10 @@ func (b*GCSBucket) FindObjectIfExists(key string) (*GCSObject, error) {
 	return &GCSObject{Bucket: b, Key: key, meta: object}, nil
 }
 
-func (b*GCSBucket) PutObject(key string, body io.ReadSeeker) (*GCSObject, error) {
+func (b *GCSBucket) PutObject(key string, body io.ReadSeeker) (*GCSObject, error) {
 	o := &GCSObject{
 		Bucket: b,
-		Key: key,
+		Key:    key,
 	}
 	err := o.putObject(body)
 	if err != nil {
@@ -34,7 +34,6 @@ func (b*GCSBucket) PutObject(key string, body io.ReadSeeker) (*GCSObject, error)
 	return o, nil
 }
 
-func (b*GCSBucket) PublicURL() (string) {
+func (b *GCSBucket) PublicURL() string {
 	return "https://storage.googleapis.com/" + b.Name + "/"
 }
-

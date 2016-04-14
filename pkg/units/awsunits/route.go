@@ -98,7 +98,7 @@ func (s *Route) checkChanges(a, e, changes *Route) error {
 	return nil
 }
 
-func (_*Route) RenderAWS(t *fi.AWSAPITarget, a, e, changes *Route) error {
+func (_ *Route) RenderAWS(t *fi.AWSAPITarget, a, e, changes *Route) error {
 	if a == nil {
 		cidr := e.CIDR
 		if cidr == nil {
@@ -141,7 +141,7 @@ func (_*Route) RenderAWS(t *fi.AWSAPITarget, a, e, changes *Route) error {
 	return nil
 }
 
-func (_*Route) RenderBash(t *fi.BashTarget, a, e, changes *Route) error {
+func (_ *Route) RenderBash(t *fi.BashTarget, a, e, changes *Route) error {
 	//t.CreateVar(e)
 	if a == nil {
 		cidr := e.CIDR

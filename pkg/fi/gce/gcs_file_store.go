@@ -1,9 +1,9 @@
 package gce
 
 import (
+	"encoding/hex"
 	"github.com/golang/glog"
 	"github.com/kopeio/kope/pkg/fi"
-	"encoding/hex"
 )
 
 type GCSFileStore struct {
@@ -18,8 +18,8 @@ func NewGCSFileStore(bucket *GCSBucket, prefix string) *GCSFileStore {
 	}
 }
 
-func (s*GCSFileStore) PutResource(key string, r fi.Resource, hashAlgorithm fi.HashAlgorithm) (string, string, error) {
-	hashes, err := fi.HashesForResource(r, []fi.HashAlgorithm{fi.HashAlgorithmMD5, hashAlgorithm })
+func (s *GCSFileStore) PutResource(key string, r fi.Resource, hashAlgorithm fi.HashAlgorithm) (string, string, error) {
+	hashes, err := fi.HashesForResource(r, []fi.HashAlgorithm{fi.HashAlgorithmMD5, hashAlgorithm})
 	if err != nil {
 		return "", "", err
 	}

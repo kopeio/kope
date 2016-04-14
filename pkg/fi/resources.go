@@ -1,13 +1,13 @@
 package fi
 
 import (
-	"io"
 	"bytes"
-	"fmt"
-	"os"
-	"encoding/hex"
-	"hash"
 	"encoding/base64"
+	"encoding/hex"
+	"fmt"
+	"hash"
+	"io"
+	"os"
 )
 
 type Resources interface {
@@ -170,7 +170,7 @@ type StringResource struct {
 var _ Resource = &StringResource{}
 
 func NewStringResource(s string) *StringResource {
-	return &StringResource{s:s}
+	return &StringResource{s: s}
 }
 
 func (s *StringResource) Open() (io.ReadSeeker, error) {
@@ -228,7 +228,7 @@ type FileResource struct {
 var _ Resource = &FileResource{}
 
 func NewFileResource(path string) *FileResource {
-	return &FileResource{Path:path}
+	return &FileResource{Path: path}
 }
 func (r *FileResource) Open() (io.ReadSeeker, error) {
 	in, err := os.Open(r.Path)

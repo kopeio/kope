@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/kopeio/kope/pkg/fi"
+	"github.com/kopeio/kope/pkg/fi/gce"
 	"google.golang.org/api/compute/v1"
 	"strings"
-	"github.com/kopeio/kope/pkg/fi/gce"
 )
 
 type PersistentDisk struct {
@@ -26,7 +26,7 @@ func (s *PersistentDisk) GetID() *string {
 	return s.Name
 }
 
-func (d*PersistentDisk) String() string {
+func (d *PersistentDisk) String() string {
 	return fi.JsonString(d)
 }
 
@@ -35,7 +35,7 @@ func (d*PersistentDisk) String() string {
 func lastComponent(s string) string {
 	lastSlash := strings.LastIndex(s, "/")
 	if lastSlash != -1 {
-		s = s[lastSlash + 1:]
+		s = s[lastSlash+1:]
 	}
 	return s
 }
@@ -63,9 +63,9 @@ func (e *PersistentDisk) find(c *fi.RunContext) (*PersistentDisk, error) {
 func (e *PersistentDisk) URL(project string) string {
 	u := &gce.GoogleCloudURL{
 		Project: project,
-		Zone: *e.Zone,
-		Type: "disks",
-		Name: *e.Name,
+		Zone:    *e.Zone,
+		Type:    "disks",
+		Name:    *e.Name,
 	}
 	return u.BuildURL()
 }
@@ -109,16 +109,16 @@ func (s *PersistentDisk) checkChanges(a, e, changes *PersistentDisk) error {
 	return nil
 }
 
-func (_*PersistentDisk) RenderGCE(t *gce.GCEAPITarget, a, e, changes *PersistentDisk) error {
+func (_ *PersistentDisk) RenderGCE(t *gce.GCEAPITarget, a, e, changes *PersistentDisk) error {
 	typeURL := fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/diskTypes/%s",
 		t.Cloud.Project,
 		*e.Zone,
 		*e.VolumeType)
 
 	disk := &compute.Disk{
-		Name: *e.Name,
+		Name:   *e.Name,
 		SizeGb: *e.SizeGB,
-		Type: typeURL,
+		Type:   typeURL,
 	}
 
 	if a == nil {

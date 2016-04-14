@@ -9,9 +9,9 @@ type GCEAPITarget struct {
 
 var _ fi.Target = &GCEAPITarget{}
 
-func NewGCEAPITarget(cloud*GCECloud, filestore fi.FileStore) *GCEAPITarget {
+func NewGCEAPITarget(cloud *GCECloud, filestore fi.FileStore) *GCEAPITarget {
 	return &GCEAPITarget{
-		Cloud: cloud,
+		Cloud:     cloud,
 		filestore: filestore,
 	}
 }
@@ -19,7 +19,6 @@ func NewGCEAPITarget(cloud*GCECloud, filestore fi.FileStore) *GCEAPITarget {
 func (t *GCEAPITarget) FileStore() fi.FileStore {
 	return t.filestore
 }
-
 
 //func (t *GCEAPITarget) AddAWSTags(id string, expected map[string]string) error {
 //	actual, err := t.Cloud.GetTags(id)
@@ -84,4 +83,3 @@ func (t *GCEAPITarget) FileStore() fi.FileStore {
 //		}
 //	}
 //}
-

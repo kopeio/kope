@@ -2,9 +2,9 @@ package kutil
 
 import (
 	"fmt"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/golang/glog"
 	"github.com/kopeio/kope/pkg/fi"
-	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
 type DiscoverClusters struct {
@@ -16,7 +16,7 @@ type DiscoveredCluster struct {
 	ClusterID string
 }
 
-func (c*DiscoverClusters)  ListClusters() (map[string]*DiscoveredCluster, error) {
+func (c *DiscoverClusters) ListClusters() (map[string]*DiscoveredCluster, error) {
 	cloud := c.Cloud.(*fi.AWSCloud)
 
 	clusters := make(map[string]*DiscoveredCluster)

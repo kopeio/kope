@@ -1,15 +1,15 @@
 package fi
 
 import (
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"fmt"
 	"github.com/golang/glog"
-	"github.com/aws/aws-sdk-go/service/elb"
 )
 
 type AWSCloud struct {
@@ -19,9 +19,9 @@ type AWSCloud struct {
 	ELB         *elb.ELB
 	Autoscaling *autoscaling.AutoScaling
 
-	Region      string
+	Region string
 
-	tags        map[string]string
+	tags map[string]string
 }
 
 var _ Cloud = &AWSCloud{}
@@ -56,7 +56,7 @@ func NewAWSCloud(region string, tags map[string]string) *AWSCloud {
 	return c
 }
 
-func (c*AWSCloud) GetS3(region string) *s3.S3 {
+func (c *AWSCloud) GetS3(region string) *s3.S3 {
 	return c.S3.GetS3(region)
 }
 
@@ -106,7 +106,7 @@ func (c *AWSCloud) GetTags(resourceId string) (map[string]string, error) {
 	return tags, nil
 }
 
-func (c *AWSCloud) CreateTags(resourceId string, tags map[string]string) (error) {
+func (c *AWSCloud) CreateTags(resourceId string, tags map[string]string) error {
 	if len(tags) == 0 {
 		return nil
 	}
@@ -116,7 +116,7 @@ func (c *AWSCloud) CreateTags(resourceId string, tags map[string]string) (error)
 		ec2Tags = append(ec2Tags, &ec2.Tag{Key: aws.String(k), Value: aws.String(v)})
 	}
 	request := &ec2.CreateTagsInput{
-		Tags: ec2Tags,
+		Tags:      ec2Tags,
 		Resources: []*string{&resourceId},
 	}
 
@@ -155,7 +155,7 @@ func (c *AWSCloud) BuildFilters(name *string) []*ec2.Filter {
 	}
 
 	for k, v := range merged {
-		filter := NewEC2Filter("tag:" + k, v)
+		filter := NewEC2Filter("tag:"+k, v)
 		filters = append(filters, filter)
 	}
 	return filters
@@ -218,6 +218,3 @@ func (t *AWSCloud) DescribeVPC(vpcID string) (*ec2.Vpc, error) {
 	vpc := response.Vpcs[0]
 	return vpc, nil
 }
-
-
-

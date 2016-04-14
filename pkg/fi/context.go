@@ -1,16 +1,16 @@
 package fi
 
 type Context struct {
-	roles     []string
-	state     map[string]interface{}
+	roles []string
+	state map[string]interface{}
 
 	//os        *OS
-	cloud     Cloud
-	castore   CAStore
+	cloud   Cloud
+	castore CAStore
 	//config    Config
 	resources *ResourcesList
 
-	root      *node
+	root *node
 }
 
 //type Context struct {
@@ -26,13 +26,12 @@ type Context struct {
 //	return c
 //}
 
-
 func NewContext(cloud Cloud, castore CAStore) (*Context, error) {
 	c := &Context{
-		state:     make(map[string]interface{}),
+		state: make(map[string]interface{}),
 		//os:        &OS{},
 		cloud:     cloud,
-		castore: castore,
+		castore:   castore,
 		resources: &ResourcesList{},
 	}
 
@@ -49,7 +48,7 @@ func NewContext(cloud Cloud, castore CAStore) (*Context, error) {
 func (c *Context) NewRunContext(target Target, runMode RunMode) *RunContext {
 	rc := &RunContext{
 		Context: c,
-		Target: target,
+		Target:  target,
 		node:    c.root,
 		mode:    runMode,
 	}

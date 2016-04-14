@@ -1,9 +1,9 @@
 package fi
 
 import (
+	"fmt"
 	"github.com/golang/glog"
 	"reflect"
-	"fmt"
 	"strings"
 )
 
@@ -23,7 +23,7 @@ type RunContext struct {
 	node   *node
 	mode   RunMode
 
-	dirty  bool
+	dirty bool
 }
 
 func (c *RunContext) MarkDirty() {
@@ -44,7 +44,7 @@ func (c *RunContext) IsValidate() bool {
 func (c *RunContext) buildChildContext(n *node) *RunContext {
 	child := &RunContext{
 		Context: c.Context,
-		Target: c.Target,
+		Target:  c.Target,
 		parent:  c,
 		node:    n,
 		mode:    c.mode,
@@ -56,7 +56,7 @@ func (c *RunContext) Run() error {
 	return c.node.Run(c)
 }
 
-func (c*RunContext) Render(a, e, changes Unit) error {
+func (c *RunContext) Render(a, e, changes Unit) error {
 	if _, ok := c.Target.(*DryRunTarget); ok {
 		return c.Target.(*DryRunTarget).Render(a, e, changes)
 	}
@@ -95,7 +95,7 @@ func (c*RunContext) Render(a, e, changes Unit) error {
 	if renderer == nil {
 		return fmt.Errorf("Could not find Render method on type %T (target %T)", e, c.Target)
 	}
-	var args  []reflect.Value
+	var args []reflect.Value
 	args = append(args, reflect.ValueOf(c.Target))
 	args = append(args, reflect.ValueOf(a))
 	args = append(args, reflect.ValueOf(e))

@@ -115,7 +115,7 @@ func (e *VPC) Run(c *fi.RunContext) error {
 	return c.Render(a, e, changes)
 }
 
-func (_*VPC) RenderAWS(t *fi.AWSAPITarget, a, e, changes *VPC) error {
+func (_ *VPC) RenderAWS(t *fi.AWSAPITarget, a, e, changes *VPC) error {
 	if a == nil {
 		if e.CIDR == nil {
 			// TODO: Auto-assign CIDR
@@ -168,7 +168,7 @@ func (_*VPC) RenderAWS(t *fi.AWSAPITarget, a, e, changes *VPC) error {
 	return t.AddAWSTags(*e.ID, t.Cloud.BuildTags(e.Name))
 }
 
-func (_*VPC) RenderBash(t *fi.BashTarget, a, e, changes *VPC) error {
+func (_ *VPC) RenderBash(t *fi.BashTarget, a, e, changes *VPC) error {
 	t.CreateVar(e)
 
 	if a == nil {

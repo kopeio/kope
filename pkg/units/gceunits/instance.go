@@ -3,11 +3,11 @@ package gceunits
 import (
 	"fmt"
 
-	"github.com/kopeio/kope/pkg/fi"
-	"google.golang.org/api/compute/v1"
-	"github.com/kopeio/kope/pkg/fi/gce"
-	"strings"
 	"github.com/golang/glog"
+	"github.com/kopeio/kope/pkg/fi"
+	"github.com/kopeio/kope/pkg/fi/gce"
+	"google.golang.org/api/compute/v1"
+	"strings"
 )
 
 var scopeAliases map[string]string
@@ -15,22 +15,22 @@ var scopeAliases map[string]string
 type Instance struct {
 	fi.SimpleUnit
 
-	Name         *string
-	Network      *Network
-	Tags         []string
-	Preemptible  *bool
-	Image        *string
-	Disks        map[string]*PersistentDisk
+	Name        *string
+	Network     *Network
+	Tags        []string
+	Preemptible *bool
+	Image       *string
+	Disks       map[string]*PersistentDisk
 
 	CanIPForward *bool
 	IPAddress    *IPAddress
 	Subnet       *Subnet
 
-	Scopes       []string
+	Scopes []string
 
-	Metadata     map[string]fi.Resource
-	Zone         *string
-	MachineType  *string
+	Metadata    map[string]fi.Resource
+	Zone        *string
+	MachineType *string
 }
 
 func (s *Instance) Key() string {
@@ -156,7 +156,7 @@ func (s *Instance) checkChanges(a, e, changes *Instance) error {
 }
 
 func expandScopeAlias(s string) string {
-	switch (s) {
+	switch s {
 	case "storage-ro":
 		s = "https://www.googleapis.com/auth/devstorage.read_only"
 	case "storage-rw":
@@ -177,13 +177,13 @@ func expandScopeAlias(s string) string {
 
 func init() {
 	scopeAliases = map[string]string{
-		"storage-ro": "https://www.googleapis.com/auth/devstorage.read_only",
-		"storage-rw": "https://www.googleapis.com/auth/devstorage.read_write",
-		"compute-ro": "https://www.googleapis.com/auth/compute.read_only",
-		"compute-rw": "https://www.googleapis.com/auth/compute",
-		"monitoring": "https://www.googleapis.com/auth/monitoring",
+		"storage-ro":       "https://www.googleapis.com/auth/devstorage.read_only",
+		"storage-rw":       "https://www.googleapis.com/auth/devstorage.read_write",
+		"compute-ro":       "https://www.googleapis.com/auth/compute.read_only",
+		"compute-rw":       "https://www.googleapis.com/auth/compute",
+		"monitoring":       "https://www.googleapis.com/auth/monitoring",
 		"monitoring-write": "https://www.googleapis.com/auth/monitoring.write",
-		"logging-write": "https://www.googleapis.com/auth/logging.write",
+		"logging-write":    "https://www.googleapis.com/auth/logging.write",
 	}
 }
 
@@ -204,7 +204,7 @@ func scopeToShortForm(s string) string {
 	return s
 }
 
-func (_*Instance) RenderGCE(t *gce.GCEAPITarget, a, e, changes *Instance) error {
+func (_ *Instance) RenderGCE(t *gce.GCEAPITarget, a, e, changes *Instance) error {
 	zone := *e.Zone
 	project := t.Cloud.Project
 
@@ -212,14 +212,14 @@ func (_*Instance) RenderGCE(t *gce.GCEAPITarget, a, e, changes *Instance) error 
 	if fi.BoolValue(e.Preemptible) {
 		scheduling = &compute.Scheduling{
 			OnHostMaintenance: "TERMINATE",
-			Preemptible: true,
+			Preemptible:       true,
 		}
 	} else {
 		scheduling = &compute.Scheduling{
 			AutomaticRestart: true,
 			// TODO: Migrate or terminate?
 			OnHostMaintenance: "MIGRATE",
-			Preemptible: false,
+			Preemptible:       false,
 		}
 	}
 
@@ -228,19 +228,19 @@ func (_*Instance) RenderGCE(t *gce.GCEAPITarget, a, e, changes *Instance) error 
 		InitializeParams: &compute.AttachedDiskInitializeParams{
 			SourceImage: BuildImageURL(project, *e.Image),
 		},
-		Boot: true,
-		DeviceName:"persistent-disks-0",
-		Index:0,
-		AutoDelete:true,
-		Mode: "READ_WRITE",
-		Type: "PERSISTENT",
+		Boot:       true,
+		DeviceName: "persistent-disks-0",
+		Index:      0,
+		AutoDelete: true,
+		Mode:       "READ_WRITE",
+		Type:       "PERSISTENT",
 	})
 
 	for name, disk := range e.Disks {
 		disks = append(disks, &compute.AttachedDisk{
-			Source: disk.URL(project),
+			Source:     disk.URL(project),
 			AutoDelete: false,
-			Mode: "READ_WRITE",
+			Mode:       "READ_WRITE",
 			DeviceName: name,
 		})
 	}
@@ -264,7 +264,7 @@ func (_*Instance) RenderGCE(t *gce.GCEAPITarget, a, e, changes *Instance) error 
 		networkInterface := &compute.NetworkInterface{
 			AccessConfigs: []*compute.AccessConfig{&compute.AccessConfig{
 				NatIP: *addr,
-				Type: "ONE_TO_ONE_NAT",
+				Type:  "ONE_TO_ONE_NAT",
 			}},
 			Network: e.Network.URL(),
 		}
@@ -283,7 +283,7 @@ func (_*Instance) RenderGCE(t *gce.GCEAPITarget, a, e, changes *Instance) error 
 			scopes = append(scopes, s)
 		}
 		serviceAccounts = append(serviceAccounts, &compute.ServiceAccount{
-			Email:"default",
+			Email:  "default",
 			Scopes: scopes,
 		})
 	}
@@ -295,7 +295,7 @@ func (_*Instance) RenderGCE(t *gce.GCEAPITarget, a, e, changes *Instance) error 
 			return fmt.Errorf("error rendering Instance metadata %q: %v", key, err)
 		}
 		metadataItems = append(metadataItems, &compute.MetadataItems{
-			Key: key,
+			Key:   key,
 			Value: fi.String(v),
 		})
 	}
@@ -363,7 +363,6 @@ func ShortenImageURL(imageURL string) (string, error) {
 	}
 	return u.Project + "/" + u.Name, nil
 }
-
 
 //func (_*Instance) RenderBash(t *fi.BashTarget, a, e, changes *Instance) error {
 //	t.CreateVar(e)

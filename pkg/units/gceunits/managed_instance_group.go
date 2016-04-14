@@ -3,11 +3,11 @@ package gceunits
 import (
 	"fmt"
 
-	"github.com/kopeio/kope/pkg/fi"
-	"google.golang.org/api/compute/v1"
-	"github.com/kopeio/kope/pkg/fi/gce"
-	"time"
 	"github.com/golang/glog"
+	"github.com/kopeio/kope/pkg/fi"
+	"github.com/kopeio/kope/pkg/fi/gce"
+	"google.golang.org/api/compute/v1"
+	"time"
 )
 
 type ManagedInstanceGroup struct {
@@ -44,7 +44,7 @@ func (e *ManagedInstanceGroup) find(c *fi.RunContext) (*ManagedInstanceGroup, er
 	actual.Zone = fi.String(lastComponent(r.Zone))
 	actual.BaseInstanceName = &r.BaseInstanceName
 	actual.TargetSize = &r.TargetSize
-	actual.InstanceTemplate = &InstanceTemplate{Name: fi.String(lastComponent(r.InstanceTemplate)) }
+	actual.InstanceTemplate = &InstanceTemplate{Name: fi.String(lastComponent(r.InstanceTemplate))}
 
 	return actual, nil
 }
@@ -79,14 +79,14 @@ func BuildInstanceTemplateURL(project, name string) string {
 	return fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/global/instanceTemplates/%s", project, name)
 }
 
-func (_*ManagedInstanceGroup) RenderGCE(t *gce.GCEAPITarget, a, e, changes *ManagedInstanceGroup) error {
+func (_ *ManagedInstanceGroup) RenderGCE(t *gce.GCEAPITarget, a, e, changes *ManagedInstanceGroup) error {
 	project := t.Cloud.Project
 
 	i := &compute.InstanceGroupManager{
-		Name: *e.Name,
-		Zone: *e.Zone,
+		Name:             *e.Name,
+		Zone:             *e.Zone,
 		BaseInstanceName: *e.BaseInstanceName,
-		TargetSize: *e.TargetSize,
+		TargetSize:       *e.TargetSize,
 		InstanceTemplate: BuildInstanceTemplateURL(project, *e.InstanceTemplate.Name),
 	}
 

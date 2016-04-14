@@ -3,10 +3,10 @@ package awsunits
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/golang/glog"
 	"github.com/kopeio/kope/pkg/fi"
-	"github.com/aws/aws-sdk-go/aws"
 )
 
 type InternetGatewayAttachment struct {
@@ -53,8 +53,8 @@ func (e *InternetGatewayAttachment) find(c *fi.RunContext) (*InternetGatewayAtta
 	for _, attachment := range igw.Attachments {
 		if aws.StringValue(attachment.VpcId) == *vpcID {
 			actual := &InternetGatewayAttachment{
-				VPC: &VPC{ID:vpcID},
-				InternetGateway: &InternetGateway{ID:e.InternetGateway.ID},
+				VPC:             &VPC{ID: vpcID},
+				InternetGateway: &InternetGateway{ID: e.InternetGateway.ID},
 			}
 			glog.V(2).Infof("found matching InternetGatewayAttachment")
 			return actual, nil
@@ -94,12 +94,12 @@ func (s *InternetGatewayAttachment) checkChanges(a, e, changes *InternetGatewayA
 	return nil
 }
 
-func (_*InternetGatewayAttachment) RenderAWS(t *fi.AWSAPITarget, a, e, changes *InternetGatewayAttachment) error {
+func (_ *InternetGatewayAttachment) RenderAWS(t *fi.AWSAPITarget, a, e, changes *InternetGatewayAttachment) error {
 	if a == nil {
 		glog.V(2).Infof("Creating InternetGatewayAttachment")
 
 		attachRequest := &ec2.AttachInternetGatewayInput{
-			VpcId: e.VPC.ID,
+			VpcId:             e.VPC.ID,
 			InternetGatewayId: e.InternetGateway.ID,
 		}
 
@@ -112,7 +112,7 @@ func (_*InternetGatewayAttachment) RenderAWS(t *fi.AWSAPITarget, a, e, changes *
 	return nil // No tags
 }
 
-func (_*InternetGatewayAttachment) RenderBash(t *fi.BashTarget, a, e, changes *InternetGatewayAttachment) error {
+func (_ *InternetGatewayAttachment) RenderBash(t *fi.BashTarget, a, e, changes *InternetGatewayAttachment) error {
 	//t.CreateVar(e)
 	if a == nil {
 		vpcID := t.ReadVar(e.VPC)

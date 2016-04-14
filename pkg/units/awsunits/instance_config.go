@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/golang/glog"
-	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/kopeio/kope/pkg/fi"
 )
 
@@ -22,7 +22,7 @@ func BlockDeviceMappingFromEC2(i *ec2.BlockDeviceMapping) *BlockDeviceMapping {
 	return o
 }
 
-func (i*BlockDeviceMapping) ToEC2() *ec2.BlockDeviceMapping {
+func (i *BlockDeviceMapping) ToEC2() *ec2.BlockDeviceMapping {
 	o := &ec2.BlockDeviceMapping{}
 	o.DeviceName = i.DeviceName
 	o.VirtualName = i.VirtualName
@@ -36,7 +36,7 @@ func BlockDeviceMappingFromAutoscaling(i *autoscaling.BlockDeviceMapping) *Block
 	return o
 }
 
-func (i*BlockDeviceMapping) ToAutoscaling() *autoscaling.BlockDeviceMapping {
+func (i *BlockDeviceMapping) ToAutoscaling() *autoscaling.BlockDeviceMapping {
 	o := &autoscaling.BlockDeviceMapping{}
 	o.DeviceName = i.DeviceName
 	o.VirtualName = i.VirtualName
@@ -99,7 +99,7 @@ func (i *InstanceCommonConfig) buildEC2CreateArgs(output *fi.BashTarget) []strin
 		args = append(args, "--security-group-ids", ids)
 	}
 	if i.IAMInstanceProfile != nil {
-		args = append(args, "--iam-instance-profile", "Name=" + *i.IAMInstanceProfile.Name)
+		args = append(args, "--iam-instance-profile", "Name="+*i.IAMInstanceProfile.Name)
 	}
 	return args
 }

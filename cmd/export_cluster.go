@@ -3,19 +3,19 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
+	"encoding/json"
+	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/golang/glog"
+	"github.com/kopeio/kope/pkg/fi"
 	"github.com/kopeio/kope/pkg/kutil"
-	"path"
-	"strings"
-	"strconv"
+	"github.com/kopeio/kope/pkg/units"
+	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"encoding/json"
-	"github.com/kopeio/kope/pkg/fi"
-	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/kopeio/kope/pkg/units"
+	"path"
+	"strconv"
+	"strings"
 )
 
 type ExportClusterCmd struct {
@@ -31,8 +31,8 @@ func init() {
 	cmd := &cobra.Command{
 		Use:   "cluster",
 		Short: "export cluster configuration",
-		Long: `Connects to your master server over SSH, and exports the configuration from the settings.`,
-		Run: func(cmd *cobra.Command, args[]string) {
+		Long:  `Connects to your master server over SSH, and exports the configuration from the settings.`,
+		Run: func(cmd *cobra.Command, args []string) {
 			err := exportClusterCmd.Run()
 			if err != nil {
 				glog.Exitf("%v", err)
@@ -48,7 +48,7 @@ func init() {
 	cmd.Flags().StringVarP(&exportClusterCmd.DestDir, "dest", "d", "", "Destination directory")
 }
 
-func (c*ExportClusterCmd) Run() error {
+func (c *ExportClusterCmd) Run() error {
 	if c.Master == "" {
 		return fmt.Errorf("--master must be specified")
 	}
@@ -125,8 +125,6 @@ func (c*ExportClusterCmd) Run() error {
 	}
 	k8s.VPCID = &vpcID
 
-
-
 	// We want to upgrade!
 	// k8s.ImageId = ""
 
@@ -184,7 +182,7 @@ func (c*ExportClusterCmd) Run() error {
 	if len(az) <= 2 {
 		return fmt.Errorf("Invalid AZ: ", az)
 	}
-	region := az[:len(az) - 1]
+	region := az[:len(az)-1]
 	tags := map[string]string{"KubernetesCluster": k8s.ClusterID}
 	cloud := fi.NewAWSCloud(region, tags)
 
@@ -225,7 +223,6 @@ func (c*ExportClusterCmd) Run() error {
 		return fmt.Errorf("unable to find route table for Subnet %q", k8s.SubnetID)
 	}
 	k8s.RouteTableID = rt.RouteTableId
-
 
 	//b.Context = "aws_" + instancePrefix
 
@@ -298,7 +295,7 @@ func parseInt(s string) (int, error) {
 	return int(n), nil
 }
 
-func writeConf(p string, k8s *units.K8s) (error) {
+func writeConf(p string, k8s *units.K8s) error {
 	jsonBytes, err := json.Marshal(k8s)
 	if err != nil {
 		return fmt.Errorf("error serializing configuration (json write phase): %v", err)
@@ -376,7 +373,7 @@ func findRouteTable(cloud *fi.AWSCloud, subnetID string) (*ec2.RouteTable, error
 	return rt, nil
 }
 
-func findElasticIP(cloud*fi.AWSCloud, publicIP string) (*ec2.Address, error) {
+func findElasticIP(cloud *fi.AWSCloud, publicIP string) (*ec2.Address, error) {
 	request := &ec2.DescribeAddressesInput{
 		PublicIps: []*string{&publicIP},
 	}

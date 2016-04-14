@@ -34,8 +34,8 @@ func (e *VPCDHCPOptionsAssociation) find(c *fi.RunContext) (*VPCDHCPOptionsAssoc
 	}
 
 	actual := &VPCDHCPOptionsAssociation{}
-	actual.VPC = &VPC{ID: vpc.VpcId }
-	actual.DHCPOptions = &DHCPOptions{ID: vpc.DhcpOptionsId }
+	actual.VPC = &VPC{ID: vpc.VpcId}
+	actual.DHCPOptions = &DHCPOptions{ID: vpc.DhcpOptionsId}
 	return actual, nil
 }
 
@@ -68,7 +68,7 @@ func (s *VPCDHCPOptionsAssociation) checkChanges(a, e, changes *VPCDHCPOptionsAs
 	return nil
 }
 
-func (_*VPCDHCPOptionsAssociation) RenderAWS(t *fi.AWSAPITarget, a, e, changes *VPCDHCPOptionsAssociation) error {
+func (_ *VPCDHCPOptionsAssociation) RenderAWS(t *fi.AWSAPITarget, a, e, changes *VPCDHCPOptionsAssociation) error {
 	if a == nil {
 		request := &ec2.AssociateDhcpOptionsInput{}
 		request.VpcId = e.VPC.ID
@@ -83,7 +83,7 @@ func (_*VPCDHCPOptionsAssociation) RenderAWS(t *fi.AWSAPITarget, a, e, changes *
 	return nil // no tags
 }
 
-func (_*VPCDHCPOptionsAssociation) RenderBash(t *fi.BashTarget, a, e, changes *VPCDHCPOptionsAssociation) error {
+func (_ *VPCDHCPOptionsAssociation) RenderBash(t *fi.BashTarget, a, e, changes *VPCDHCPOptionsAssociation) error {
 	//t.CreateVar(e)
 	if a == nil {
 		vpcID := t.ReadVar(e.VPC)

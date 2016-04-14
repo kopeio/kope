@@ -69,7 +69,6 @@ func (e *SecurityGroupIngress) find(c *fi.RunContext) (*SecurityGroupIngress, er
 	sg := response.SecurityGroups[0]
 	//glog.V(2).Info("found existing security group")
 
-
 	var foundRule *ec2.IpPermission
 
 	matchProtocol := "-1" // Wildcard
@@ -168,7 +167,7 @@ func (s *SecurityGroupIngress) checkChanges(a, e, changes *SecurityGroupIngress)
 	return nil
 }
 
-func (_*SecurityGroupIngress) RenderAWS(t *fi.AWSAPITarget, a, e, changes *SecurityGroupIngress) error {
+func (_ *SecurityGroupIngress) RenderAWS(t *fi.AWSAPITarget, a, e, changes *SecurityGroupIngress) error {
 	if a == nil {
 		request := &ec2.AuthorizeSecurityGroupIngressInput{}
 		request.GroupId = e.SecurityGroup.ID
@@ -196,7 +195,7 @@ func (_*SecurityGroupIngress) RenderAWS(t *fi.AWSAPITarget, a, e, changes *Secur
 	return nil //return output.AddAWSTags(cloud.Tags(), v, "vpc")
 }
 
-func (_*SecurityGroupIngress) RenderBash(t *fi.BashTarget, a, e, changes *SecurityGroupIngress) error {
+func (_ *SecurityGroupIngress) RenderBash(t *fi.BashTarget, a, e, changes *SecurityGroupIngress) error {
 	if a == nil {
 		glog.V(2).Infof("Creating SecurityGroupIngress")
 

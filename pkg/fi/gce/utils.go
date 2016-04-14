@@ -28,4 +28,3 @@ func IsNotReady(err error) bool {
 	}
 	return false
 }
-

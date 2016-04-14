@@ -3,14 +3,14 @@ package awsunits
 import (
 	"io"
 
-	"github.com/kopeio/kope/pkg/fi"
 	"bytes"
+	"github.com/kopeio/kope/pkg/fi"
 )
 
 type MasterScript struct {
 	fi.SimpleUnit
 
-	Construct func(c*fi.RunContext) (string, error)
+	Construct func(c *fi.RunContext) (string, error)
 	contents  string
 }
 
@@ -23,7 +23,7 @@ var _ fi.Resource = &MasterScript{}
 type NodeScript struct {
 	fi.SimpleUnit
 
-	Construct func(c*fi.RunContext) (string, error)
+	Construct func(c *fi.RunContext) (string, error)
 	contents  string
 }
 
@@ -37,7 +37,7 @@ func (s *NodeScript) Key() string {
 //	return "node_script"
 //}
 
-func (m*MasterScript) Run(c *fi.RunContext) error {
+func (m *MasterScript) Run(c *fi.RunContext) error {
 	contents, err := m.Construct(c)
 	if err != nil {
 		return err
@@ -53,7 +53,7 @@ func (m *MasterScript) Open() (io.ReadSeeker, error) {
 	return bytes.NewReader([]byte(m.contents)), nil
 }
 
-func (m*NodeScript) Run(c *fi.RunContext) error {
+func (m *NodeScript) Run(c *fi.RunContext) error {
 	contents, err := m.Construct(c)
 	if err != nil {
 		return err

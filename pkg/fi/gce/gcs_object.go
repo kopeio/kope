@@ -1,11 +1,11 @@
 package gce
 
 import (
-	"fmt"
-	"google.golang.org/api/storage/v1"
-	"github.com/golang/glog"
-	"io"
 	"encoding/base64"
+	"fmt"
+	"github.com/golang/glog"
+	"google.golang.org/api/storage/v1"
+	"io"
 )
 
 type GCSObject struct {
@@ -14,17 +14,17 @@ type GCSObject struct {
 	meta   *storage.Object
 }
 
-func (o*GCSObject) String() string {
+func (o *GCSObject) String() string {
 	return fmt.Sprintf("gs://%s/%s", o.Bucket.Name, o.Key)
 }
 
-func (o*GCSObject) IsPublic() (bool, error) {
+func (o *GCSObject) IsPublic() (bool, error) {
 	glog.V(2).Infof("Getting GCS object ACL: %s", o)
 
 	service := o.Bucket.service
 
 	entity := "allUsers"
-	acl, err := service.ObjectAccessControls.Get(o.Bucket.Name, o.Key, entity, ).Do()
+	acl, err := service.ObjectAccessControls.Get(o.Bucket.Name, o.Key, entity).Do()
 	if err != nil {
 		if IsNotFound(err) {
 			return false, nil
@@ -42,7 +42,7 @@ func (o*GCSObject) IsPublic() (bool, error) {
 	return false, fmt.Errorf("unkonwn role for %s: %s", o, acl.Role)
 }
 
-func (o*GCSObject) Md5Hash() ([]byte, error) {
+func (o *GCSObject) Md5Hash() ([]byte, error) {
 	h := o.meta.Md5Hash
 	hashBytes, err := base64.StdEncoding.DecodeString(h)
 	if err != nil {
@@ -51,12 +51,12 @@ func (o*GCSObject) Md5Hash() ([]byte, error) {
 	return hashBytes, nil
 }
 
-func (o*GCSObject) PublicURL() (string) {
+func (o *GCSObject) PublicURL() string {
 	bucketBase := o.Bucket.PublicURL()
 	return bucketBase + o.Key
 }
 
-func (o*GCSObject) SetPublicACL() (error) {
+func (o *GCSObject) SetPublicACL() error {
 	glog.V(2).Infof("Setting GCS object ACL: %s", o)
 
 	service := o.Bucket.service
@@ -73,7 +73,7 @@ func (o*GCSObject) SetPublicACL() (error) {
 	return nil
 }
 
-func (o*GCSObject) putObject(body io.ReadSeeker) error {
+func (o *GCSObject) putObject(body io.ReadSeeker) error {
 	glog.Infof("Uploading object to %q", o)
 	meta := &storage.Object{
 		Name: o.Key,
@@ -85,4 +85,3 @@ func (o*GCSObject) putObject(body io.ReadSeeker) error {
 	o.meta = response
 	return nil
 }
-

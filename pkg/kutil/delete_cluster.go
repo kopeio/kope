@@ -1,15 +1,15 @@
 package kutil
 
 import (
+	"encoding/base64"
 	"fmt"
-	"github.com/golang/glog"
-	"github.com/kopeio/kope/pkg/fi"
-	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/aws/aws-sdk-go/service/autoscaling"
-	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
-	"encoding/base64"
+	"github.com/aws/aws-sdk-go/service/autoscaling"
+	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/elb"
+	"github.com/golang/glog"
+	"github.com/kopeio/kope/pkg/fi"
 	"strings"
 )
 
@@ -19,7 +19,7 @@ type DeleteCluster struct {
 	Cloud     fi.Cloud
 }
 
-func (c*DeleteCluster)  ListResources() ([]DeletableResource, error) {
+func (c *DeleteCluster) ListResources() ([]DeletableResource, error) {
 	cloud := c.Cloud.(*fi.AWSCloud)
 
 	var resources []DeletableResource
@@ -34,7 +34,7 @@ func (c*DeleteCluster)  ListResources() ([]DeletableResource, error) {
 			var asFilters []*autoscaling.Filter
 			for _, f := range filters {
 				asFilters = append(asFilters, &autoscaling.Filter{
-					Name: aws.String("value"),
+					Name:   aws.String("value"),
 					Values: f.Values,
 				})
 			}
@@ -47,7 +47,7 @@ func (c*DeleteCluster)  ListResources() ([]DeletableResource, error) {
 			}
 
 			for _, t := range response.Tags {
-				switch (*t.ResourceType) {
+				switch *t.ResourceType {
 				case "auto-scaling-group":
 					asgNames = append(asgNames, t.ResourceId)
 				default:
@@ -70,7 +70,7 @@ func (c*DeleteCluster)  ListResources() ([]DeletableResource, error) {
 				if !matchesAsgTags(tags, t.Tags) {
 					continue
 				}
-				resources = append(resources, &DeletableASG{Name: *t.AutoScalingGroupName })
+				resources = append(resources, &DeletableASG{Name: *t.AutoScalingGroupName})
 			}
 		}
 	}
@@ -78,8 +78,7 @@ func (c*DeleteCluster)  ListResources() ([]DeletableResource, error) {
 	{
 		glog.V(2).Infof("Listing all Autoscaling LaunchConfigurations")
 
-		request := &autoscaling.DescribeLaunchConfigurationsInput{
-		}
+		request := &autoscaling.DescribeLaunchConfigurationsInput{}
 		response, err := cloud.Autoscaling.DescribeLaunchConfigurations(request)
 		if err != nil {
 			return nil, fmt.Errorf("error listing autoscaling LaunchConfigurations: %v", err)
@@ -96,8 +95,8 @@ func (c*DeleteCluster)  ListResources() ([]DeletableResource, error) {
 				continue
 			}
 
-			if strings.Contains(string(userData), "\nINSTANCE_PREFIX: " + c.ClusterID + "\n") {
-				resources = append(resources, &DeletableAutoscalingLaunchConfiguration{Name: *t.LaunchConfigurationName })
+			if strings.Contains(string(userData), "\nINSTANCE_PREFIX: "+c.ClusterID+"\n") {
+				resources = append(resources, &DeletableAutoscalingLaunchConfiguration{Name: *t.LaunchConfigurationName})
 			}
 		}
 	}
@@ -105,8 +104,7 @@ func (c*DeleteCluster)  ListResources() ([]DeletableResource, error) {
 	{
 		glog.V(2).Infof("Listing all ELB tags")
 
-		request := &elb.DescribeLoadBalancersInput{
-		}
+		request := &elb.DescribeLoadBalancersInput{}
 		response, err := cloud.ELB.DescribeLoadBalancers(request)
 		if err != nil {
 			return nil, fmt.Errorf("error listing elb LoadBalancers: %v", err)
@@ -126,7 +124,7 @@ func (c*DeleteCluster)  ListResources() ([]DeletableResource, error) {
 				if !matchesElbTags(tags, t.Tags) {
 					continue
 				}
-				resources = append(resources, &DeletableELBLoadBalancer{Name: *t.LoadBalancerName })
+				resources = append(resources, &DeletableELBLoadBalancer{Name: *t.LoadBalancerName})
 			}
 		}
 	}
@@ -144,7 +142,7 @@ func (c*DeleteCluster)  ListResources() ([]DeletableResource, error) {
 
 		for _, t := range response.Tags {
 			var resource DeletableResource
-			switch (*t.ResourceType) {
+			switch *t.ResourceType {
 			case "instance":
 				resource = &DeletableInstance{ID: *t.ResourceId}
 			case "volume":
@@ -217,12 +215,12 @@ type DeletableInstance struct {
 	ID string
 }
 
-func (r*DeletableInstance) Delete(cloud fi.Cloud) error {
+func (r *DeletableInstance) Delete(cloud fi.Cloud) error {
 	c := cloud.(*fi.AWSCloud)
 
 	glog.V(2).Infof("Deleting EC2 instance %q", r.ID)
 	request := &ec2.TerminateInstancesInput{
-		InstanceIds: []*string{&r.ID },
+		InstanceIds: []*string{&r.ID},
 	}
 	_, err := c.EC2.TerminateInstances(request)
 	if err != nil {
@@ -230,7 +228,7 @@ func (r*DeletableInstance) Delete(cloud fi.Cloud) error {
 	}
 	return nil
 }
-func (r*DeletableInstance) String() string {
+func (r *DeletableInstance) String() string {
 	return "instance:" + r.ID
 }
 
@@ -238,7 +236,7 @@ type DeletableSecurityGroup struct {
 	ID string
 }
 
-func (r*DeletableSecurityGroup) Delete(cloud fi.Cloud) error {
+func (r *DeletableSecurityGroup) Delete(cloud fi.Cloud) error {
 	c := cloud.(*fi.AWSCloud)
 
 	// First clear all inter-dependent rules
@@ -262,7 +260,7 @@ func (r*DeletableSecurityGroup) Delete(cloud fi.Cloud) error {
 
 		if len(sg.IpPermissions) != 0 {
 			revoke := &ec2.RevokeSecurityGroupIngressInput{
-				GroupId: &r.ID,
+				GroupId:       &r.ID,
 				IpPermissions: sg.IpPermissions,
 			}
 			_, err = c.EC2.RevokeSecurityGroupIngress(revoke)
@@ -284,7 +282,7 @@ func (r*DeletableSecurityGroup) Delete(cloud fi.Cloud) error {
 	}
 	return nil
 }
-func (r*DeletableSecurityGroup) String() string {
+func (r *DeletableSecurityGroup) String() string {
 	return "SecurityGroup:" + r.ID
 }
 
@@ -292,7 +290,7 @@ type DeletableVolume struct {
 	ID string
 }
 
-func (r*DeletableVolume) Delete(cloud fi.Cloud) error {
+func (r *DeletableVolume) Delete(cloud fi.Cloud) error {
 	c := cloud.(*fi.AWSCloud)
 
 	glog.V(2).Infof("Deleting EC2 volume %q", r.ID)
@@ -310,7 +308,7 @@ func (r*DeletableVolume) Delete(cloud fi.Cloud) error {
 	}
 	return nil
 }
-func (r*DeletableVolume) String() string {
+func (r *DeletableVolume) String() string {
 	return "volume:" + r.ID
 }
 
@@ -318,7 +316,7 @@ type DeletableSubnet struct {
 	ID string
 }
 
-func (r*DeletableSubnet) Delete(cloud fi.Cloud) error {
+func (r *DeletableSubnet) Delete(cloud fi.Cloud) error {
 	c := cloud.(*fi.AWSCloud)
 
 	glog.V(2).Infof("Deleting EC2 Subnet %q", r.ID)
@@ -331,7 +329,7 @@ func (r*DeletableSubnet) Delete(cloud fi.Cloud) error {
 	}
 	return nil
 }
-func (r*DeletableSubnet) String() string {
+func (r *DeletableSubnet) String() string {
 	return "Subnet:" + r.ID
 }
 
@@ -339,7 +337,7 @@ type DeletableRouteTable struct {
 	ID string
 }
 
-func (r*DeletableRouteTable) Delete(cloud fi.Cloud) error {
+func (r *DeletableRouteTable) Delete(cloud fi.Cloud) error {
 	c := cloud.(*fi.AWSCloud)
 
 	glog.V(2).Infof("Deleting EC2 RouteTable %q", r.ID)
@@ -352,7 +350,7 @@ func (r*DeletableRouteTable) Delete(cloud fi.Cloud) error {
 	}
 	return nil
 }
-func (r*DeletableRouteTable) String() string {
+func (r *DeletableRouteTable) String() string {
 	return "RouteTable:" + r.ID
 }
 
@@ -360,7 +358,7 @@ type DeletableInternetGateway struct {
 	ID string
 }
 
-func (r*DeletableInternetGateway) Delete(cloud fi.Cloud) error {
+func (r *DeletableInternetGateway) Delete(cloud fi.Cloud) error {
 	c := cloud.(*fi.AWSCloud)
 
 	var igw *ec2.InternetGateway
@@ -385,7 +383,7 @@ func (r*DeletableInternetGateway) Delete(cloud fi.Cloud) error {
 		glog.V(2).Infof("Detaching EC2 InternetGateway %q", r.ID)
 		request := &ec2.DetachInternetGatewayInput{
 			InternetGatewayId: &r.ID,
-			VpcId: a.VpcId,
+			VpcId:             a.VpcId,
 		}
 		_, err := c.EC2.DetachInternetGateway(request)
 		if err != nil {
@@ -406,7 +404,7 @@ func (r*DeletableInternetGateway) Delete(cloud fi.Cloud) error {
 
 	return nil
 }
-func (r*DeletableInternetGateway) String() string {
+func (r *DeletableInternetGateway) String() string {
 	return "InternetGateway:" + r.ID
 }
 
@@ -414,7 +412,7 @@ type DeletableVPC struct {
 	ID string
 }
 
-func (r*DeletableVPC) Delete(cloud fi.Cloud) error {
+func (r *DeletableVPC) Delete(cloud fi.Cloud) error {
 	c := cloud.(*fi.AWSCloud)
 
 	glog.V(2).Infof("Deleting EC2 VPC %q", r.ID)
@@ -427,7 +425,7 @@ func (r*DeletableVPC) Delete(cloud fi.Cloud) error {
 	}
 	return nil
 }
-func (r*DeletableVPC) String() string {
+func (r *DeletableVPC) String() string {
 	return "VPC:" + r.ID
 }
 
@@ -435,13 +433,13 @@ type DeletableASG struct {
 	Name string
 }
 
-func (r*DeletableASG) Delete(cloud fi.Cloud) error {
+func (r *DeletableASG) Delete(cloud fi.Cloud) error {
 	c := cloud.(*fi.AWSCloud)
 
 	glog.V(2).Infof("Deleting autoscaling group %q", r.Name)
 	request := &autoscaling.DeleteAutoScalingGroupInput{
 		AutoScalingGroupName: &r.Name,
-		ForceDelete: aws.Bool(true),
+		ForceDelete:          aws.Bool(true),
 	}
 	_, err := c.Autoscaling.DeleteAutoScalingGroup(request)
 	if err != nil {
@@ -449,7 +447,7 @@ func (r*DeletableASG) Delete(cloud fi.Cloud) error {
 	}
 	return nil
 }
-func (r*DeletableASG) String() string {
+func (r *DeletableASG) String() string {
 	return "autoscaling-group:" + r.Name
 }
 
@@ -457,7 +455,7 @@ type DeletableAutoscalingLaunchConfiguration struct {
 	Name string
 }
 
-func (r*DeletableAutoscalingLaunchConfiguration) Delete(cloud fi.Cloud) error {
+func (r *DeletableAutoscalingLaunchConfiguration) Delete(cloud fi.Cloud) error {
 	c := cloud.(*fi.AWSCloud)
 
 	glog.V(2).Infof("Deleting autoscaling LaunchConfiguration %q", r.Name)
@@ -471,7 +469,7 @@ func (r*DeletableAutoscalingLaunchConfiguration) Delete(cloud fi.Cloud) error {
 	return nil
 }
 
-func (r*DeletableAutoscalingLaunchConfiguration) String() string {
+func (r *DeletableAutoscalingLaunchConfiguration) String() string {
 	return "autoscaling-launchconfiguration:" + r.Name
 }
 
@@ -479,7 +477,7 @@ type DeletableELBLoadBalancer struct {
 	Name string
 }
 
-func (r*DeletableELBLoadBalancer) Delete(cloud fi.Cloud) error {
+func (r *DeletableELBLoadBalancer) Delete(cloud fi.Cloud) error {
 	c := cloud.(*fi.AWSCloud)
 
 	glog.V(2).Infof("Deleting LoadBalancer %q", r.Name)
@@ -493,8 +491,6 @@ func (r*DeletableELBLoadBalancer) Delete(cloud fi.Cloud) error {
 	return nil
 }
 
-func (r*DeletableELBLoadBalancer) String() string {
+func (r *DeletableELBLoadBalancer) String() string {
 	return "LoadBalancer:" + r.Name
 }
-
-

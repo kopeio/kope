@@ -5,8 +5,8 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/kopeio/kope/pkg/fi"
-	"google.golang.org/api/compute/v1"
 	"github.com/kopeio/kope/pkg/fi/gce"
+	"google.golang.org/api/compute/v1"
 )
 
 type Subnet struct {
@@ -72,14 +72,14 @@ func (s *Subnet) checkChanges(a, e, changes *Subnet) error {
 	return nil
 }
 
-func (_*Subnet) RenderGCE(t *gce.GCEAPITarget, a, e, changes *Subnet) error {
+func (_ *Subnet) RenderGCE(t *gce.GCEAPITarget, a, e, changes *Subnet) error {
 	if a == nil {
 		glog.V(2).Infof("Creating Subnet with CIDR: %q", *e.CIDR)
 
 		subnet := &compute.Subnetwork{
 			IpCidrRange: *e.CIDR,
-			Name: *e.Name,
-			Network: *e.Network.Name,
+			Name:        *e.Name,
+			Network:     *e.Network.Name,
 		}
 		_, err := t.Cloud.Compute.Subnetworks.Insert(t.Cloud.Project, t.Cloud.Region, subnet).Do()
 		if err != nil {

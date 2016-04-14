@@ -3,10 +3,10 @@ package fi
 import (
 	"fmt"
 
-	"io"
 	"bytes"
-	"reflect"
 	"github.com/golang/glog"
+	"io"
+	"reflect"
 )
 
 type putResource struct {
@@ -33,8 +33,6 @@ type dryRunFilestore struct {
 	target *DryRunTarget
 }
 
-
-
 func (t *dryRunFilestore) PutResource(key string, r Resource, hashAlgorithm HashAlgorithm) (string, string, error) {
 	if r == nil {
 		glog.Fatalf("Attempt to put null resource for %q", key)
@@ -44,14 +42,13 @@ func (t *dryRunFilestore) PutResource(key string, r Resource, hashAlgorithm Hash
 	if err != nil {
 		return "", "", fmt.Errorf("error hashing resource %q: %v", key, err)
 	}
-	t.target.putResources[key + ":" + hash] = &putResource{
-		Key: key,
+	t.target.putResources[key+":"+hash] = &putResource{
+		Key:  key,
 		Hash: hash,
 	}
 
 	return url, hash, nil
 }
-
 
 var _ FileStore = &dryRunFilestore{}
 
@@ -67,9 +64,9 @@ func (t *DryRunTarget) Render(a, e, changes Unit) error {
 	aIsNil := valA.IsNil()
 
 	t.changes = append(t.changes, &render{
-		a: a,
-		aIsNil:aIsNil,
-		e: e,
+		a:       a,
+		aIsNil:  aIsNil,
+		e:       e,
 		changes: changes,
 	})
 	return nil
@@ -79,7 +76,7 @@ func (t *DryRunTarget) FileStore() FileStore {
 	return t.filestore
 }
 
-func (t*DryRunTarget) PrintReport(out io.Writer) error {
+func (t *DryRunTarget) PrintReport(out io.Writer) error {
 	b := &bytes.Buffer{}
 
 	if len(t.putResources) != 0 {
@@ -144,7 +141,7 @@ func (t*DryRunTarget) PrintReport(out io.Writer) error {
 					if ignored {
 						continue
 					}
-					changeList = append(changeList, valC.Type().Field(i).Name + description)
+					changeList = append(changeList, valC.Type().Field(i).Name+description)
 				}
 			} else {
 				return fmt.Errorf("unhandled change type: %v", valC.Type())

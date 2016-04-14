@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"strconv"
 
+	"encoding/base64"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/golang/glog"
-	"github.com/aws/aws-sdk-go/aws"
-	"strings"
 	"github.com/kopeio/kope/pkg/fi"
-	"encoding/base64"
+	"strings"
 	"time"
 )
 
@@ -23,15 +23,15 @@ func buildTimestampString() string {
 type AutoscalingGroup struct {
 	fi.SimpleUnit
 
-	Name                    *string
+	Name *string
 
 	InstanceCommonConfig
-	UserData                fi.Resource
+	UserData fi.Resource
 
-	MinSize                 *int64
-	MaxSize                 *int64
-	Subnet                  *Subnet
-	Tags                    map[string]string
+	MinSize *int64
+	MaxSize *int64
+	Subnet  *Subnet
+	Tags    map[string]string
 
 	launchConfigurationName *string
 }
@@ -143,7 +143,7 @@ func (e *AutoscalingGroup) buildTags(cloud fi.Cloud) map[string]string {
 	return tags
 }
 
-func (_*AutoscalingGroup) RenderAWS(t*fi.AWSAPITarget,a, e, changes *AutoscalingGroup) error {
+func (_ *AutoscalingGroup) RenderAWS(t *fi.AWSAPITarget, a, e, changes *AutoscalingGroup) error {
 	if a == nil {
 		launchConfigurationName := *e.Name + "-" + buildTimestampString()
 		glog.V(2).Infof("Creating autoscaling LaunchConfiguration with Name:%q", launchConfigurationName)
@@ -165,9 +165,9 @@ func (_*AutoscalingGroup) RenderAWS(t*fi.AWSAPITarget,a, e, changes *Autoscaling
 		tags := []*autoscaling.Tag{}
 		for k, v := range e.buildTags(t.Cloud) {
 			tags = append(tags, &autoscaling.Tag{
-				Key:aws.String(k),
-				Value: aws.String(v),
-				ResourceId: e.Name,
+				Key:          aws.String(k),
+				Value:        aws.String(v),
+				ResourceId:   e.Name,
 				ResourceType: aws.String("auto-scaling-group"),
 			})
 		}
@@ -188,7 +188,7 @@ func (_*AutoscalingGroup) RenderAWS(t*fi.AWSAPITarget,a, e, changes *Autoscaling
 			}
 
 			request := &autoscaling.UpdateAutoScalingGroupInput{
-				AutoScalingGroupName: e.Name,
+				AutoScalingGroupName:    e.Name,
 				LaunchConfigurationName: &launchConfigurationName,
 			}
 			_, err = t.Cloud.Autoscaling.UpdateAutoScalingGroup(request)
@@ -201,7 +201,7 @@ func (_*AutoscalingGroup) RenderAWS(t*fi.AWSAPITarget,a, e, changes *Autoscaling
 	return nil //return output.AddAWSTags(cloud.Tags(), v, "vpc")
 }
 
-func (_ *AutoscalingGroup) RenderBash(t*fi.BashTarget, a, e, changes *AutoscalingGroup) error {
+func (_ *AutoscalingGroup) RenderBash(t *fi.BashTarget, a, e, changes *AutoscalingGroup) error {
 	if a == nil {
 		launchConfigurationName := *e.Name + "-" + buildTimestampString()
 		glog.V(2).Infof("Creating autoscaling LaunchConfiguration with Name:%q", launchConfigurationName)
@@ -246,7 +246,6 @@ func (_ *AutoscalingGroup) RenderBash(t*fi.BashTarget, a, e, changes *Autoscalin
 			//glog.Infof("ACTUAL DELTA %s", ad)
 			//glog.Infof("EXPECTED DELTA %s", ed)
 
-
 			launchConfigurationName := *e.Name + "-" + buildTimestampString()
 			glog.V(2).Infof("Creating autoscaling LaunchConfiguration with Name:%q", launchConfigurationName)
 
@@ -285,7 +284,6 @@ func (g *AutoscalingGroup) Destroy(cloud *AWSCloud, output *BashTarget) error {
 }
 */
 
-
 func (e *AutoscalingGroup) findLaunchConfiguration(c *fi.RunContext, name string, dest *AutoscalingGroup) (bool, error) {
 	cloud := c.Cloud().(*fi.AWSCloud)
 
@@ -311,11 +309,11 @@ func (e *AutoscalingGroup) findLaunchConfiguration(c *fi.RunContext, name string
 	dest.Name = i.LaunchConfigurationName
 	dest.ImageID = i.ImageId
 	dest.InstanceType = i.InstanceType
-	dest.SSHKey = &SSHKey{Name:i.KeyName}
+	dest.SSHKey = &SSHKey{Name: i.KeyName}
 
 	securityGroups := []*SecurityGroup{}
 	for _, sgID := range i.SecurityGroups {
-		securityGroups = append(securityGroups, &SecurityGroup{ID:sgID})
+		securityGroups = append(securityGroups, &SecurityGroup{ID: sgID})
 	}
 	dest.SecurityGroups = securityGroups
 	dest.AssociatePublicIP = i.AssociatePublicIpAddress
@@ -329,7 +327,7 @@ func (e *AutoscalingGroup) findLaunchConfiguration(c *fi.RunContext, name string
 		return false, fmt.Errorf("error decoding UserData: %v", err)
 	}
 	dest.UserData = fi.NewStringResource(string(userData))
-	dest.IAMInstanceProfile = &IAMInstanceProfile{ID: i.IamInstanceProfile }
+	dest.IAMInstanceProfile = &IAMInstanceProfile{ID: i.IamInstanceProfile}
 	dest.AssociatePublicIP = i.AssociatePublicIpAddress
 
 	return true, nil
@@ -390,11 +388,10 @@ func renderAutoscalingLaunchConfigurationBash(t *fi.BashTarget, name string, e *
 		if err != nil {
 			glog.Fatalf("error adding resource: %v", err)
 		}
-		args = append(args, "--user-data", "file://" + tempFile)
+		args = append(args, "--user-data", "file://"+tempFile)
 	}
 
 	t.AddAutoscalingCommand(args...)
 
 	return nil
 }
-

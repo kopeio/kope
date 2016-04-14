@@ -16,15 +16,15 @@ import (
 type S3File struct {
 	fi.SimpleUnit
 
-	Bucket    *S3Bucket
-	Key       *string
-	Source    fi.Resource
-	Public    *bool
+	Bucket *S3Bucket
+	Key    *string
+	Source fi.Resource
+	Public *bool
 
 	//rendered  bool
 	publicURL *string
 
-	etag      *string
+	etag *string
 }
 
 func (s *S3File) Prefix() string {
@@ -94,11 +94,11 @@ func (s *S3File) checkChanges(a, e, changes *S3File) error {
 	return nil
 }
 
-func (_*S3File) RenderAWS(t *fi.AWSAPITarget, a, e, changes *S3File) error {
+func (_ *S3File) RenderAWS(t *fi.AWSAPITarget, a, e, changes *S3File) error {
 	panic("S3 Render to AWSAPITarget not implemented")
 }
 
-func (_*S3File) RenderBash(t *fi.BashTarget, a, e, changes *S3File) error {
+func (_ *S3File) RenderBash(t *fi.BashTarget, a, e, changes *S3File) error {
 	needToUpload := true
 
 	localPath, err := t.AddLocalResource(e.Source)
@@ -184,6 +184,3 @@ func (f *S3File) PublicURL() string {
 func (f *S3File) String() string {
 	return fmt.Sprintf("S3File (s3://%s/%s)", *f.Bucket.Name, *f.Key)
 }
-
-
-

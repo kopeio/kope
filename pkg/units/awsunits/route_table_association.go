@@ -3,10 +3,10 @@ package awsunits
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/golang/glog"
 	"github.com/kopeio/kope/pkg/fi"
-	"github.com/aws/aws-sdk-go/aws"
 )
 
 type RouteTableAssociation struct {
@@ -61,7 +61,7 @@ func (e *RouteTableAssociation) find(c *fi.RunContext) (*RouteTableAssociation, 
 		}
 		actual := &RouteTableAssociation{}
 		actual.ID = rta.RouteTableAssociationId
-		actual.RouteTable = &RouteTable{ID: rta.RouteTableId }
+		actual.RouteTable = &RouteTable{ID: rta.RouteTableId}
 		actual.Subnet = &Subnet{ID: rta.SubnetId}
 		glog.V(2).Infof("found matching RouteTableAssociation %q", *actual.ID)
 		return actual, nil
@@ -106,7 +106,7 @@ func (s *RouteTableAssociation) checkChanges(a, e, changes *RouteTableAssociatio
 	return nil
 }
 
-func (_*RouteTableAssociation) RenderAWS(t *fi.AWSAPITarget, a, e, changes *RouteTableAssociation) error {
+func (_ *RouteTableAssociation) RenderAWS(t *fi.AWSAPITarget, a, e, changes *RouteTableAssociation) error {
 	if a == nil {
 		subnetID := e.Subnet.ID
 		if subnetID == nil {
@@ -135,7 +135,7 @@ func (_*RouteTableAssociation) RenderAWS(t *fi.AWSAPITarget, a, e, changes *Rout
 	return nil // no tags
 }
 
-func (_*RouteTableAssociation) RenderBash(t *fi.BashTarget, a, e, changes *RouteTableAssociation) error {
+func (_ *RouteTableAssociation) RenderBash(t *fi.BashTarget, a, e, changes *RouteTableAssociation) error {
 	t.CreateVar(e)
 	if a == nil {
 		subnetID := t.ReadVar(e.Subnet)

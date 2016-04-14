@@ -3,10 +3,10 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
 	"github.com/golang/glog"
-	"io/ioutil"
 	"github.com/kopeio/kope/pkg/kutil"
+	"github.com/spf13/cobra"
+	"io/ioutil"
 	"os"
 	"path"
 )
@@ -23,8 +23,8 @@ func init() {
 	cmd := &cobra.Command{
 		Use:   "kubecfg",
 		Short: "Create kubecfg file from master",
-		Long: `Connects to your master server over SSH, and builds a kubecfg file from the settings.`,
-		Run: func(cmd *cobra.Command, args[]string) {
+		Long:  `Connects to your master server over SSH, and builds a kubecfg file from the settings.`,
+		Run: func(cmd *cobra.Command, args []string) {
 			err := createKubecfg.Run()
 			if err != nil {
 				glog.Exitf("%v", err)
@@ -39,7 +39,7 @@ func init() {
 	cmd.Flags().BoolVar(&createKubecfg.UseKubeletCert, "use-kubelet-cert", false, "Build using the kublet cert (useful if the kubecfg cert is not available)")
 }
 
-func (c*CreateKubecfgCmd) Run() error {
+func (c *CreateKubecfgCmd) Run() error {
 	if c.Master == "" {
 		return fmt.Errorf("--master must be specified")
 	}
@@ -129,8 +129,7 @@ func (c*CreateKubecfgCmd) Run() error {
 	return nil
 }
 
-
-func downloadFile(master *kutil.NodeSSH, remotePath string, localPath string) (error) {
+func downloadFile(master *kutil.NodeSSH, remotePath string, localPath string) error {
 	b, err := master.ReadFile(remotePath)
 	if err != nil {
 		return err

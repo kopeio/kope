@@ -1,0 +1,45 @@
+# TODO: Support multiple instance groups
+
+instanceTemplate:
+  name: {{ .nodeInstancePrefix }}-template
+  network: network/default
+  machineType: {{ .nodeInstanceType }}
+  # TODO: Make configurable
+  bootDiskType: pd-standard
+  bootDiskSizeGB: 100
+  bootDiskImage: google-containers/container-vm-v20160321
+  canIpForward: true
+  # TODO: Support preemptible nodes?
+  preemptible: false
+  scopes:
+    - compute-rw
+    - monitoring
+    - logging-write
+    - storage-ro
+  metadata:
+    startup-script: {{ .bootstrapScript }}
+    kube-env: {{ .kubeEnv }}
+    cluster-name: {{ .clusterID }}
+  tags:
+    - {{ .nodeTag }}
+
+managedInstanceGroup:
+  name: {{ .nodeInstancePrefix }}-group
+  zone: {{ .zone }}
+  baseInstanceName: {{ .nodeInstancePrefix }}
+  targetSize: {{ .nodeCount }}
+  instanceTemplate: instanceTemplate/{{ .nodeInstancePrefix }}-template
+
+# Allow traffic from nodes -> nodes
+firewallRule:
+  name: {{ .nodeTag }}-all
+  network: network/default
+  sourceRanges: {{ .clusterIPRange }}
+  targetTags: {{ .nodeTag }}
+  allowed:
+    - tcp
+    - udp
+    - icmp
+    - esp
+    - ah
+    - sctp

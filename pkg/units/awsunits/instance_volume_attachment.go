@@ -3,10 +3,10 @@ package awsunits
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/golang/glog"
 	"github.com/kopeio/kope/pkg/fi"
-	"github.com/aws/aws-sdk-go/aws"
 )
 
 type InstanceVolumeAttachment struct {
@@ -45,8 +45,8 @@ func (e *InstanceVolumeAttachment) find(c *fi.RunContext) (*InstanceVolumeAttach
 		}
 
 		actual := &InstanceVolumeAttachment{}
-		actual.Instance = &Instance{ID: e.Instance.ID }
-		actual.Volume = &PersistentVolume{ID: e.Volume.ID }
+		actual.Instance = &Instance{ID: e.Instance.ID}
+		actual.Volume = &PersistentVolume{ID: e.Volume.ID}
 		actual.Device = bdm.DeviceName
 		glog.V(2).Infof("found matching InstanceVolumeAttachment %q", *actual.Device)
 		return actual, nil
@@ -91,7 +91,7 @@ func (s *InstanceVolumeAttachment) checkChanges(a, e, changes *InstanceVolumeAtt
 	return nil
 }
 
-func (_*InstanceVolumeAttachment) RenderAWS(t *fi.AWSAPITarget,a, e, changes *InstanceVolumeAttachment) error {
+func (_ *InstanceVolumeAttachment) RenderAWS(t *fi.AWSAPITarget, a, e, changes *InstanceVolumeAttachment) error {
 	if a == nil {
 		err := t.WaitForInstanceRunning(*e.Instance.ID)
 		if err != nil {
@@ -112,7 +112,7 @@ func (_*InstanceVolumeAttachment) RenderAWS(t *fi.AWSAPITarget,a, e, changes *In
 	return nil // no tags
 }
 
-func (_*InstanceVolumeAttachment) RenderBash(t *fi.BashTarget, a, e, changes *InstanceVolumeAttachment) error {
+func (_ *InstanceVolumeAttachment) RenderBash(t *fi.BashTarget, a, e, changes *InstanceVolumeAttachment) error {
 	//t.CreateVar(e)
 	if a == nil {
 		t.WaitForInstanceRunning(e.Instance)

@@ -3,11 +3,11 @@ package awsunits
 import (
 	"fmt"
 
+	"encoding/base64"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/golang/glog"
 	"github.com/kopeio/kope/pkg/fi"
-	"encoding/base64"
 )
 
 const MaxUserDataSize = 16384
@@ -15,15 +15,15 @@ const MaxUserDataSize = 16384
 type Instance struct {
 	fi.SimpleUnit
 
-	ID               *string
+	ID *string
 	InstanceCommonConfig
-	UserData         fi.Resource
+	UserData fi.Resource
 
 	Subnet           *Subnet
 	PrivateIPAddress *string
 
-	Name             *string
-	Tags             map[string]string
+	Name *string
+	Tags map[string]string
 }
 
 func (s *Instance) Key() string {
@@ -125,7 +125,7 @@ func (e *Instance) buildTags(cloud *fi.AWSCloud) map[string]string {
 	return tags
 }
 
-func (_*Instance) RenderAWS(t *fi.AWSAPITarget, a, e, changes *Instance) error {
+func (_ *Instance) RenderAWS(t *fi.AWSAPITarget, a, e, changes *Instance) error {
 	if a == nil {
 		glog.V(2).Infof("Creating Instance with Name:%q", *e.Name)
 
@@ -141,11 +141,11 @@ func (_*Instance) RenderAWS(t *fi.AWSAPITarget, a, e, changes *Instance) error {
 		}
 		request.NetworkInterfaces = []*ec2.InstanceNetworkInterfaceSpecification{
 			{
-				DeviceIndex:aws.Int64(0),
-				AssociatePublicIpAddress:e.AssociatePublicIP,
-				SubnetId:e.Subnet.ID,
-				PrivateIpAddress:e.PrivateIPAddress,
-				Groups: securityGroupIDs,
+				DeviceIndex:              aws.Int64(0),
+				AssociatePublicIpAddress: e.AssociatePublicIP,
+				SubnetId:                 e.Subnet.ID,
+				PrivateIpAddress:         e.PrivateIPAddress,
+				Groups:                   securityGroupIDs,
 			},
 		}
 
@@ -189,7 +189,7 @@ func (_*Instance) RenderAWS(t *fi.AWSAPITarget, a, e, changes *Instance) error {
 	return t.AddAWSTags(*e.ID, e.buildTags(t.Cloud))
 }
 
-func (_*Instance) RenderBash(t *fi.BashTarget, a, e, changes *Instance) error {
+func (_ *Instance) RenderBash(t *fi.BashTarget, a, e, changes *Instance) error {
 	t.CreateVar(e)
 	if a == nil {
 		glog.V(2).Infof("Creating Instance with Name:%q", *e.Name)
@@ -213,7 +213,7 @@ func (_*Instance) RenderBash(t *fi.BashTarget, a, e, changes *Instance) error {
 			if err != nil {
 				glog.Fatalf("error adding resource: %v", err)
 			}
-			args = append(args, "--user-data", "file://" + tempFile)
+			args = append(args, "--user-data", "file://"+tempFile)
 		}
 
 		if e.Subnet != nil {

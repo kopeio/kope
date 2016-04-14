@@ -3,8 +3,8 @@ package fi
 import (
 	"bytes"
 	"fmt"
-	"strconv"
 	"io"
+	"strconv"
 	"strings"
 )
 
@@ -43,8 +43,6 @@ func (sw *ScriptWriter) WriteTo(w io.Writer) error {
 func (sw *ScriptWriter) AsString() string {
 	return sw.buffer.String()
 }
-
-
 
 //func (s *ScriptWriter) CopyTemplate(key string, replacements map[string]string) {
 //	templatePath := path.Join(templateDir, key)
@@ -90,4 +88,3 @@ func (s *ScriptWriter) WriteHereDoc(dest string, contents string) {
 	}
 	s.WriteString("E_O_F\n\n")
 }
-

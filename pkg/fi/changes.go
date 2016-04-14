@@ -3,9 +3,9 @@ package fi
 import (
 	"reflect"
 
-	"github.com/golang/glog"
 	"encoding/json"
 	"fmt"
+	"github.com/golang/glog"
 )
 
 func BuildChanges(a, e, changes interface{}) bool {
@@ -77,9 +77,9 @@ func equalFieldValues(a, e reflect.Value) bool {
 	if a.Kind() == reflect.Map {
 		return equalMapValues(a, e)
 	}
-	if (a.Kind() == reflect.Ptr || a.Kind() == reflect.Interface) &&  !a.IsNil() {
+	if (a.Kind() == reflect.Ptr || a.Kind() == reflect.Interface) && !a.IsNil() {
 		aHasID, ok := a.Interface().(HasID)
-		if ok && (e.Kind() == reflect.Ptr || e.Kind() == reflect.Interface) &&  !e.IsNil() {
+		if ok && (e.Kind() == reflect.Ptr || e.Kind() == reflect.Interface) && !e.IsNil() {
 			eHasID, ok := e.Interface().(HasID)
 			if ok {
 				aID := aHasID.GetID()
@@ -207,5 +207,3 @@ func DebugPrint(o interface{}) string {
 	}
 	return fmt.Sprint(o)
 }
-
-

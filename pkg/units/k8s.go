@@ -1,21 +1,21 @@
 package units
 
 import (
-	"github.com/kopeio/kope/pkg/fi"
-	"github.com/golang/glog"
-	"strconv"
-	"net"
-	"fmt"
-	"encoding/binary"
-	"math/big"
-	"encoding/base64"
-	"gopkg.in/yaml.v2"
-	"encoding/json"
 	"crypto/md5"
-	"golang.org/x/crypto/ssh"
-	"strings"
+	"encoding/base64"
+	"encoding/binary"
+	"encoding/json"
+	"fmt"
+	"github.com/golang/glog"
+	"github.com/kopeio/kope/pkg/fi"
 	"github.com/kopeio/kope/pkg/units/awsunits"
 	"github.com/kopeio/kope/pkg/units/gceunits"
+	"golang.org/x/crypto/ssh"
+	"gopkg.in/yaml.v2"
+	"math/big"
+	"net"
+	"strconv"
+	"strings"
 )
 
 const (
@@ -25,125 +25,125 @@ const (
 type K8s struct {
 	fi.SimpleUnit
 
-	S3Region                      string
-	S3BucketName                  string
+	S3Region     string
+	S3BucketName string
 
-	CloudProvider                 string
-	CloudProviderConfig           string
+	CloudProvider       string
+	CloudProviderConfig string
 
-	ClusterID                     string
+	ClusterID string
 
-	MasterInstanceType            string
-	NodeInstanceType              string
+	MasterInstanceType string
+	NodeInstanceType   string
 
-	ImageID                       string
+	ImageID string
 
-	MasterInternalIP              string
+	MasterInternalIP string
 	// TODO: Just move to master volume?
-	MasterVolume                  string
-	MasterVolumeSize              *int
-	MasterVolumeType              string
-	MasterCIDR                    string
-	MasterRoleDocument            fi.Resource
-	MasterRolePolicy              fi.Resource
+	MasterVolume       string
+	MasterVolumeSize   *int
+	MasterVolumeType   string
+	MasterCIDR         string
+	MasterRoleDocument fi.Resource
+	MasterRolePolicy   fi.Resource
 
-	NodeRoleDocument              fi.Resource
-	NodeRolePolicy                fi.Resource
+	NodeRoleDocument fi.Resource
+	NodeRolePolicy   fi.Resource
 
-	NodeCount                     int
+	NodeCount int
 
-	InstancePrefix                string
-	NodeInstancePrefix            string
-	ClusterIPRange                string
-	MasterIPRange                 string
-	AllocateNodeCIDRs             bool
+	InstancePrefix     string
+	NodeInstancePrefix string
+	ClusterIPRange     string
+	MasterIPRange      string
+	AllocateNodeCIDRs  bool
 
-	ServerBinaryTar               fi.Downloadable
-	SaltTar                       fi.Downloadable
-	BootstrapScript               fi.Resource
+	ServerBinaryTar fi.Downloadable
+	SaltTar         fi.Downloadable
+	BootstrapScript fi.Resource
 
-	Zone                          string
-	KubeUser                      string
-	KubePassword                  string
+	Zone         string
+	KubeUser     string
+	KubePassword string
 
 	//SaltMaster                    string
-	MasterName                    string
+	MasterName string
 
-	ServiceClusterIPRange         string
-	EnableL7LoadBalancing         string
-	EnableClusterMonitoring       string
-	EnableClusterLogging          bool
-	EnableNodeLogging             bool
-	LoggingDestination            string
-	ElasticsearchLoggingReplicas  int
+	ServiceClusterIPRange        string
+	EnableL7LoadBalancing        string
+	EnableClusterMonitoring      string
+	EnableClusterLogging         bool
+	EnableNodeLogging            bool
+	LoggingDestination           string
+	ElasticsearchLoggingReplicas int
 
-	EnableClusterRegistry         *bool
-	ClusterRegistryDisk           *string
-	ClusterRegistryDiskSize       *int
+	EnableClusterRegistry   *bool
+	ClusterRegistryDisk     *string
+	ClusterRegistryDiskSize *int
 
-	EnableClusterDNS              bool
-	DNSReplicas                   int
-	DNSServerIP                   string
-	DNSDomain                     string
+	EnableClusterDNS bool
+	DNSReplicas      int
+	DNSServerIP      string
+	DNSDomain        string
 
-	RuntimeConfig                 string
+	RuntimeConfig string
 
-	CACert                        fi.Resource
-	CAKey                         fi.Resource
-	KubeletCert                   fi.Resource
-	KubeletKey                    fi.Resource
-	KubeletToken                  string
-	KubeProxyToken                string
-	BearerToken                   string
-	MasterCert                    fi.Resource
-	MasterKey                     fi.Resource
-	KubecfgCert                   fi.Resource
-	KubecfgKey                    fi.Resource
+	CACert         fi.Resource
+	CAKey          fi.Resource
+	KubeletCert    fi.Resource
+	KubeletKey     fi.Resource
+	KubeletToken   string
+	KubeProxyToken string
+	BearerToken    string
+	MasterCert     fi.Resource
+	MasterKey      fi.Resource
+	KubecfgCert    fi.Resource
+	KubecfgKey     fi.Resource
 
-	RegisterMasterKubelet         *bool
+	RegisterMasterKubelet *bool
 	//KubeletApiserver              string
 
-	EnableManifestURL             *bool
-	ManifestURL                   *string
-	ManifestURLHeader             *string
+	EnableManifestURL *bool
+	ManifestURL       *string
+	ManifestURLHeader *string
 
-	NetworkProvider               string
+	NetworkProvider string
 
-	HairpinMode                   string
+	HairpinMode string
 
-	OpencontrailTag               string
-	OpencontrailKubernetesTag     string
-	OpencontrailPublicSubnet      string
+	OpencontrailTag           string
+	OpencontrailKubernetesTag string
+	OpencontrailPublicSubnet  string
 
-	KubeImageTag                  string
-	KubeDockerRegistry            string
-	KubeAddonRegistry             string
+	KubeImageTag       string
+	KubeDockerRegistry string
+	KubeAddonRegistry  string
 
-	Multizone                     *bool
+	Multizone *bool
 
-	NonMasqueradeCidr             string
+	NonMasqueradeCidr string
 
-	E2EStorageTestEnvironment     string
+	E2EStorageTestEnvironment string
 
-	EnableClusterUI               bool
+	EnableClusterUI bool
 
-	AdmissionControl              string
+	AdmissionControl string
 
-	KubeletPort                   *int
+	KubeletPort *int
 
-	KubeApiserverRequestTimeout   *int
+	KubeApiserverRequestTimeout *int
 
-	TerminatedPodGcThreshold      *string
+	TerminatedPodGcThreshold *string
 
-	KubeManifestsTarURL           string
-	KubeManifestsTarSha256        string
+	KubeManifestsTarURL    string
+	KubeManifestsTarSha256 string
 
-	TestCluster                   string
+	TestCluster string
 
-	DockerOptions                 string
-	DockerStorage                 string
+	DockerOptions string
+	DockerStorage string
 
-	MasterExtraSans               []string
+	MasterExtraSans []string
 
 	// TODO: Make struct?
 	KubeletTestArgs               string
@@ -159,38 +159,37 @@ type K8s struct {
 	KubeProxyTestArgs             string
 	KubeProxyTestLogLevel         string
 
-	NodeLabels                    string
-	OsDistribution                string
+	NodeLabels     string
+	OsDistribution string
 
-	ExtraDockerOpts               string
+	ExtraDockerOpts string
 
-	ContainerRuntime              string
-	RktVersion                    string
-	RktPath                       string
-	KubernetesConfigureCbr0       string
+	ContainerRuntime        string
+	RktVersion              string
+	RktPath                 string
+	KubernetesConfigureCbr0 string
 
-	EnableCustomMetrics           bool
+	EnableCustomMetrics bool
 
-	SSHPublicKey                  fi.Resource
+	SSHPublicKey fi.Resource
 
 	// For upgrades
-	SubnetID                      *string
-	VPCID                         *string
-	InternetGatewayID             *string
-	RouteTableID                  *string
-	DHCPOptionsID                 *string
-	MasterElasticIP               *string
+	SubnetID          *string
+	VPCID             *string
+	InternetGatewayID *string
+	RouteTableID      *string
+	DHCPOptionsID     *string
+	MasterElasticIP   *string
 }
 
-func (k*K8s) Key() string {
+func (k *K8s) Key() string {
 	return k.ClusterID
 }
 
-func (k*K8s) BuildEnv(isMaster bool) (map[string]string, error) {
+func (k *K8s) BuildEnv(isMaster bool) (map[string]string, error) {
 	// The bootstrap script requires some variables to be set...
 	// We use this as a marker for future cleanup
 	legacyEmptyVar := ""
-
 
 	// For now, we add everything as a string...
 	// The first problem is that the python parser converts true / false to "True" and "False",
@@ -331,12 +330,12 @@ func (k*K8s) BuildEnv(isMaster bool) (map[string]string, error) {
 		}
 		if k.ManifestURL != nil {
 			y["MANIFEST_URL"] = *k.ManifestURL
-		}else {
+		} else {
 			y["MANIFEST_URL"] = legacyEmptyVar
 		}
 		if k.ManifestURLHeader != nil {
 			y["MANIFEST_URL_HEADER"] = *k.ManifestURLHeader
-		}else {
+		} else {
 			y["MANIFEST_URL_HEADER"] = legacyEmptyVar
 		}
 		y["NUM_NODES"] = strconv.Itoa(k.NodeCount)
@@ -401,14 +400,13 @@ func (k*K8s) BuildEnv(isMaster bool) (map[string]string, error) {
 
 	}
 
-
 	// This next bit for changes vs kube-up:
 	y["CA_KEY"] = asBase64(k.CAKey) // https://github.com/kubernetes/kubernetes/issues/23264
 
 	return y, nil
 }
 
-func (k*K8s) Init() {
+func (k *K8s) Init() {
 	k.MasterInternalIP = "172.20.0.9"
 	k.NodeCount = 2
 	k.DockerStorage = "aufs"
@@ -442,7 +440,7 @@ func (k*K8s) Init() {
 	//k.CloudProvider = "aws"
 }
 
-func (k*K8s) MergeState(state []byte) error {
+func (k *K8s) MergeState(state []byte) error {
 	glog.V(4).Infof("Loading yaml: %s", string(state))
 
 	var yamlObj map[string]interface{}
@@ -541,17 +539,17 @@ func (k *K8s) addAWS(c *fi.BuildContext) {
 		masterVolumeType = k.MasterVolumeType
 	}
 	masterPV := &awsunits.PersistentVolume{
-		AvailabilityZone:         fi.String(k.Zone),
-		SizeGB:       fi.Int64(int64(masterVolumeSize)),
-		VolumeType: fi.String(masterVolumeType),
-		Name:    fi.String(clusterID + "-master-pd"),
+		AvailabilityZone: fi.String(k.Zone),
+		SizeGB:           fi.Int64(int64(masterVolumeSize)),
+		VolumeType:       fi.String(masterVolumeType),
+		Name:             fi.String(clusterID + "-master-pd"),
 	}
 	c.Add(masterPV)
 
 	masterIP := &awsunits.ElasticIP{
-		PublicIP: k.MasterElasticIP,
+		PublicIP:      k.MasterElasticIP,
 		TagOnResource: masterPV,
-		TagUsingKey: fi.String("kubernetes.io/master-ip"),
+		TagUsingKey:   fi.String("kubernetes.io/master-ip"),
 	}
 	c.Add(masterIP)
 
@@ -577,31 +575,31 @@ func (k *K8s) addAWS(c *fi.BuildContext) {
 
 	iamMasterInstanceProfileRole := &awsunits.IAMInstanceProfileRole{
 		InstanceProfile: iamMasterInstanceProfile,
-		Role: iamMasterRole,
+		Role:            iamMasterRole,
 	}
 	c.Add(iamMasterInstanceProfileRole)
 
 	iamNodeRole := &awsunits.IAMRole{
-		Name:             fi.String("kubernetes-minion"),
+		Name:               fi.String("kubernetes-minion"),
 		RolePolicyDocument: k.NodeRoleDocument,
 	}
 	c.Add(iamNodeRole)
 
 	iamNodeRolePolicy := &awsunits.IAMRolePolicy{
 		Role:           iamNodeRole,
-		Name:          fi.String("kubernetes-minion"),
+		Name:           fi.String("kubernetes-minion"),
 		PolicyDocument: k.NodeRolePolicy,
 	}
 	c.Add(iamNodeRolePolicy)
 
 	iamNodeInstanceProfile := &awsunits.IAMInstanceProfile{
-		Name:fi.String("kubernetes-minion"),
+		Name: fi.String("kubernetes-minion"),
 	}
 	c.Add(iamNodeInstanceProfile)
 
 	iamNodeInstanceProfileRole := &awsunits.IAMInstanceProfileRole{
 		InstanceProfile: iamNodeInstanceProfile,
-		Role: iamNodeRole,
+		Role:            iamNodeRole,
 	}
 	c.Add(iamNodeInstanceProfileRole)
 
@@ -636,11 +634,11 @@ func (k *K8s) addAWS(c *fi.BuildContext) {
 	c.Add(sshKey)
 
 	vpc := &awsunits.VPC{
-		ID: k.VPCID,
-		CIDR:fi.String("172.20.0.0/16"),
-		Name: fi.String("kubernetes-" + clusterID),
-		EnableDNSSupport:fi.Bool(true),
-		EnableDNSHostnames:fi.Bool(true),
+		ID:                 k.VPCID,
+		CIDR:               fi.String("172.20.0.0/16"),
+		Name:               fi.String("kubernetes-" + clusterID),
+		EnableDNSSupport:   fi.Bool(true),
+		EnableDNSHostnames: fi.Bool(true),
 	}
 	c.Add(vpc)
 
@@ -650,21 +648,21 @@ func (k *K8s) addAWS(c *fi.BuildContext) {
 		dhcpDomainName = "ec2.internal"
 	}
 	dhcpOptions := &awsunits.DHCPOptions{
-		ID: k.DHCPOptionsID,
-		Name: fi.String("kubernetes-" + clusterID),
-		DomainName: fi.String(dhcpDomainName),
+		ID:                k.DHCPOptionsID,
+		Name:              fi.String("kubernetes-" + clusterID),
+		DomainName:        fi.String(dhcpDomainName),
 		DomainNameServers: fi.String("AmazonProvidedDNS"),
 	}
 	c.Add(dhcpOptions)
 
-	c.Add(&awsunits.VPCDHCPOptionsAssociation{VPC: vpc, DHCPOptions: dhcpOptions })
+	c.Add(&awsunits.VPCDHCPOptionsAssociation{VPC: vpc, DHCPOptions: dhcpOptions})
 
 	subnet := &awsunits.Subnet{
-		VPC: vpc,
+		VPC:              vpc,
 		AvailabilityZone: fi.String(k.Zone),
-		CIDR: fi.String("172.20.0.0/24"),
-		Name: fi.String("kubernetes-" + clusterID),
-		ID: k.SubnetID,
+		CIDR:             fi.String("172.20.0.0/24"),
+		Name:             fi.String("kubernetes-" + clusterID),
+		ID:               k.SubnetID,
 	}
 	c.Add(subnet)
 
@@ -706,7 +704,7 @@ func (k *K8s) addAWS(c *fi.BuildContext) {
 	c.Add(masterSG.AllowTCP("0.0.0.0/0", 443, 443))
 
 	masterUserData := &awsunits.MasterScript{
-		Construct: func(c*fi.RunContext) (string, error) {
+		Construct: func(c *fi.RunContext) (string, error) {
 			isMaster := true
 			return buildAWSScript(c, k, isMaster)
 		},
@@ -720,7 +718,7 @@ func (k *K8s) addAWS(c *fi.BuildContext) {
 	//  only affects the big storage instance types, which aren't a typical use case right now.
 	for i := 0; i < 4; i++ {
 		bdm := &awsunits.BlockDeviceMapping{
-			DeviceName:  fi.String("/dev/sd" + string('c' + i)),
+			DeviceName:  fi.String("/dev/sd" + string('c'+i)),
 			VirtualName: fi.String("ephemeral" + strconv.Itoa(i)),
 		}
 		masterBlockDeviceMappings = append(masterBlockDeviceMappings, bdm)
@@ -728,7 +726,7 @@ func (k *K8s) addAWS(c *fi.BuildContext) {
 
 	nodeBlockDeviceMappings := masterBlockDeviceMappings
 	nodeUserData := &awsunits.NodeScript{
-		Construct: func(c*fi.RunContext) (string, error) {
+		Construct: func(c *fi.RunContext) (string, error) {
 			isMaster := false
 			return buildAWSScript(c, k, isMaster)
 		},
@@ -741,9 +739,9 @@ func (k *K8s) addAWS(c *fi.BuildContext) {
 	}
 
 	masterInstance := &awsunits.Instance{
-		Name: fi.String(clusterID + "-master"),
-		Subnet:              subnet,
-		PrivateIPAddress:    fi.String(k.MasterInternalIP),
+		Name:             fi.String(clusterID + "-master"),
+		Subnet:           subnet,
+		PrivateIPAddress: fi.String(k.MasterInternalIP),
 		InstanceCommonConfig: awsunits.InstanceCommonConfig{
 			SSHKey:              sshKey,
 			SecurityGroups:      []*awsunits.SecurityGroup{masterSG},
@@ -753,13 +751,13 @@ func (k *K8s) addAWS(c *fi.BuildContext) {
 			AssociatePublicIP:   fi.Bool(true),
 			BlockDeviceMappings: masterBlockDeviceMappings,
 		},
-		UserData:            masterUserData,
-		Tags: map[string]string{"Role": "master"},
+		UserData: masterUserData,
+		Tags:     map[string]string{"Role": "master"},
 	}
 	c.Add(masterInstance)
 
-	c.Add(&awsunits.InstanceElasticIPAttachment{Instance:masterInstance, ElasticIP: masterIP})
-	c.Add(&awsunits.InstanceVolumeAttachment{Instance:masterInstance, Volume: masterPV, Device: fi.String("/dev/sdb")})
+	c.Add(&awsunits.InstanceElasticIPAttachment{Instance: masterInstance, ElasticIP: masterIP})
+	c.Add(&awsunits.InstanceVolumeAttachment{Instance: masterInstance, Volume: masterPV, Device: fi.String("/dev/sdb")})
 
 	nodeInstanceType := k.NodeInstanceType
 	if nodeInstanceType == "" {
@@ -767,10 +765,10 @@ func (k *K8s) addAWS(c *fi.BuildContext) {
 	}
 
 	nodeGroup := &awsunits.AutoscalingGroup{
-		Name:                fi.String(clusterID + "-minion-group"),
-		MinSize:             fi.Int64(int64(k.NodeCount)),
-		MaxSize:             fi.Int64(int64(k.NodeCount)),
-		Subnet:              subnet,
+		Name:    fi.String(clusterID + "-minion-group"),
+		MinSize: fi.Int64(int64(k.NodeCount)),
+		MaxSize: fi.Int64(int64(k.NodeCount)),
+		Subnet:  subnet,
 		Tags: map[string]string{
 			"Role": "node",
 		},
@@ -783,7 +781,7 @@ func (k *K8s) addAWS(c *fi.BuildContext) {
 			AssociatePublicIP:   fi.Bool(true),
 			BlockDeviceMappings: nodeBlockDeviceMappings,
 		},
-		UserData:            nodeUserData,
+		UserData: nodeUserData,
 	}
 	c.Add(nodeGroup)
 
@@ -851,17 +849,6 @@ func (k *K8s) addGCE(c *fi.BuildContext) {
 
 	networkName := "default"
 
-	//if k.ImageID == "" {
-	//	jessie := &DistroJessie{}
-	//	imageID, err := jessie.GetImageID(c.Context)
-	//	if err != nil {
-	//		glog.Exitf("error while trying to find AWS image: %v", err)
-	//	}
-	//	k.ImageID = imageID
-	//}
-	//region := az[:len(az) - 1]
-	//
-
 	clusterID := k.ClusterID
 
 	// Note that some of these defaults are written back to the config, so that they end up in node_env
@@ -884,370 +871,183 @@ func (k *K8s) addGCE(c *fi.BuildContext) {
 		k.ClusterIPRange = "10.244.0.0/16"
 	}
 
-	network := &gceunits.Network{
-		CIDR: fi.String("10.240.0.0/16"),
-		Name: fi.String(networkName),
-	}
-	c.Add(network)
+	//network := &gceunits.Network{
+	//	CIDR: fi.String("10.240.0.0/16"),
+	//	Name: fi.String(networkName),
+	//}
+	//c.Add(network)
 
-	masterVolumeSize := DefaultMasterVolumeSize
-	if k.MasterVolumeSize != nil {
-		masterVolumeSize = *k.MasterVolumeSize
-	}
-	masterVolumeType := "pd-ssd"
-	if k.MasterVolumeType != "" {
-		masterVolumeType = k.MasterVolumeType
-	}
-	masterPV := &gceunits.PersistentDisk{
-		Name:    fi.String(k.MasterName + "-pd"),
-		Zone:         fi.String(k.Zone),
-		SizeGB:       fi.Int64(int64(masterVolumeSize)),
-		VolumeType: fi.String(masterVolumeType),
-	}
-	c.Add(masterPV)
+	//masterVolumeSize := DefaultMasterVolumeSize
+	//if k.MasterVolumeSize != nil {
+	//	masterVolumeSize = *k.MasterVolumeSize
+	//}
+	//masterVolumeType := "pd-ssd"
+	//if k.MasterVolumeType != "" {
+	//	masterVolumeType = k.MasterVolumeType
+	//}
+	//masterPV := &gceunits.PersistentDisk{
+	//	Name:       fi.String(k.MasterName + "-pd"),
+	//	Zone:       fi.String(k.Zone),
+	//	SizeGB:     fi.Int64(int64(masterVolumeSize)),
+	//	VolumeType: fi.String(masterVolumeType),
+	//}
+	//c.Add(masterPV)
 
-	// Open master HTTPS
-	c.Add(&gceunits.FirewallRule{
-		Name: fi.String(k.MasterName + "-https"),
-		Network: network,
-		SourceRanges: []string{"0.0.0.0/0"},
-		TargetTags: []string{masterTag},
-		Allowed: []string{"tcp:443"},
-	})
+	//// Open master HTTPS
+	//c.Add(&gceunits.FirewallRule{
+	//	Name:         fi.String(k.MasterName + "-https"),
+	//	Network:      network,
+	//	SourceRanges: []string{"0.0.0.0/0"},
+	//	TargetTags:   []string{masterTag},
+	//	Allowed:      []string{"tcp:443"},
+	//})
 
-	masterIP := &gceunits.IPAddress{
-		Name: fi.String(k.MasterName + "-ip"),
-		Address: k.MasterElasticIP,
-	}
-	c.Add(masterIP)
+	//masterIP := &gceunits.IPAddress{
+	//	Name:    fi.String(k.MasterName + "-ip"),
+	//	Address: k.MasterElasticIP,
+	//}
+	//c.Add(masterIP)
 
 	c.Add(&CertBuilder{
 		Kubernetes: k,
-		MasterIP: masterIP,
+		MasterIP:   masterIP,
 	})
 
-	//iamMasterRole := &IAMRole{
-	//	Name:               String("kubernetes-master"),
-	//	RolePolicyDocument: k.MasterRoleDocument,
-	//}
-	//c.Add(iamMasterRole)
+	//// Allow all internal traffic
+	//c.Add(&gceunits.FirewallRule{
+	//	Name:         fi.String(networkName + "-default-internal"),
+	//	Network:      network,
+	//	SourceRanges: []string{"10.0.0.0/8"},
+	//	Allowed:      []string{"tcp:1-65535", "udp:1-65535", "icmp"},
+	//})
 	//
-	//iamMasterRolePolicy := &IAMRolePolicy{
-	//	Role:           iamMasterRole,
-	//	Name:           String("kubernetes-master"),
-	//	PolicyDocument: k.MasterRolePolicy,
-	//}
-	//c.Add(iamMasterRolePolicy)
+	//// SSH is open to the world
+	//c.Add(&gceunits.FirewallRule{
+	//	Name:         fi.String(networkName + "-default-ssh"),
+	//	Network:      network,
+	//	SourceRanges: []string{"0.0.0.0/0"},
+	//	Allowed:      []string{"tcp:22"},
+	//})
+
+	//// TODO: Make configurable
+	//masterImage := "google-containers/container-vm-v20160321"
 	//
-	//iamMasterInstanceProfile := &IAMInstanceProfile{
-	//	Name: String("kubernetes-master"),
-	//}
-	//c.Add(iamMasterInstanceProfile)
+	//nodeCount := k.NodeCount
 	//
-	//iamMasterInstanceProfileRole := &IAMInstanceProfileRole{
-	//	InstanceProfile: iamMasterInstanceProfile,
-	//	Role: iamMasterRole,
-	//}
-	//c.Add(iamMasterInstanceProfileRole)
-	//
-	//iamNodeRole := &IAMRole{
-	//	Name:             String("kubernetes-minion"),
-	//	RolePolicyDocument: k.NodeRoleDocument,
-	//}
-	//c.Add(iamNodeRole)
-	//
-	//iamNodeRolePolicy := &IAMRolePolicy{
-	//	Role:           iamNodeRole,
-	//	Name:          String("kubernetes-minion"),
-	//	PolicyDocument: k.NodeRolePolicy,
-	//}
-	//c.Add(iamNodeRolePolicy)
-	//
-	//iamNodeInstanceProfile := &IAMInstanceProfile{
-	//	Name:String("kubernetes-minion"),
-	//}
-	//c.Add(iamNodeInstanceProfile)
-	//
-	//iamNodeInstanceProfileRole := &IAMInstanceProfileRole{
-	//	InstanceProfile: iamNodeInstanceProfile,
-	//	Role: iamNodeRole,
-	//}
-	//c.Add(iamNodeInstanceProfileRole)
-	//
-	//sshKey := &SSHKey{PublicKey: k.SSHPublicKey}
-	//if sshKey.Name == nil && sshKey.PublicKey != nil {
-	//	sshPublicKeyAuth, err := fi.ResourceAsString(sshKey.PublicKey)
-	//	if err != nil {
-	//		glog.Exitf("error reading SSH public key: %v", err)
+	//masterInstanceType := k.MasterInstanceType
+	//if masterInstanceType == "" {
+	//	if nodeCount > 500 {
+	//		masterInstanceType = "n1-standard-32"
+	//	} else if nodeCount > 250 {
+	//		masterInstanceType = "n1-standard-16"
+	//	} else if nodeCount > 100 {
+	//		masterInstanceType = "n1-standard-8"
+	//	} else if nodeCount > 10 {
+	//		masterInstanceType = "n1-standard-4"
+	//	} else if nodeCount > 5 {
+	//		masterInstanceType = "n1-standard-2"
+	//	} else {
+	//		masterInstanceType = "n1-standard-1"
 	//	}
-	//
-	//	tokens := strings.Split(sshPublicKeyAuth, " ")
-	//	if len(tokens) < 2 {
-	//		glog.Exitf("error parsing SSH public key: %s", sshPublicKeyAuth)
-	//	}
-	//
-	//	sshPublicKeyBytes, err := base64.StdEncoding.DecodeString(tokens[1])
-	//	if len(tokens) < 2 {
-	//		glog.Exitf("error decoding SSH public key: %s", sshPublicKeyAuth)
-	//	}
-	//
-	//	// We don't technically need to parse and remarshal it, but it ensures the key is valid
-	//	sshPublicKey, err := ssh.ParsePublicKey(sshPublicKeyBytes)
-	//	if err != nil {
-	//		glog.Exitf("error parsing SSH public key: %v", err)
-	//	}
-	//
-	//	h := md5.Sum(sshPublicKey.Marshal())
-	//	sshKeyFingerprint := fmt.Sprintf("%x", h)
-	//	sshKey.Name = String("kubernetes-" + sshKeyFingerprint)
-	//
 	//}
-	//c.Add(sshKey)
-
-
-	//region := c.Cloud().(*fi.AWSCloud).Region
-	//dhcpDomainName := region + ".compute.internal"
-	//if region == "us-east-1" {
-	//	dhcpDomainName = "ec2.internal"
+	//masterMetadata := map[string]fi.Resource{
+	//	"startup-script": k.BootstrapScript, // cluster/gce/configure-vm.sh
+	//	"kube-env": fi.NewFuncResource(func() ([]byte, error) {
+	//		isMaster := true
+	//		data, err := k.BuildEnv(isMaster)
+	//		if err != nil {
+	//			return nil, err
+	//		}
+	//
+	//		yamlData, err := yaml.Marshal(data)
+	//		if err != nil {
+	//			return nil, fmt.Errorf("error marshaling env to yaml: %v", err)
+	//		}
+	//		return yamlData, nil
+	//	}),
+	//	"cluster-name": fi.NewStringResource(clusterID),
 	//}
-	//dhcpOptions := &DHCPOptions{
-	//	ID: k.DHCPOptionsID,
-	//	Name: String("kubernetes-" + clusterID),
-	//	DomainName: String(dhcpDomainName),
-	//	DomainNameServers: String("AmazonProvidedDNS"),
-	//}
-	//c.Add(dhcpOptions)
-	//
-	//c.Add(&VPCDHCPOptionsAssociation{VPC: vpc, DHCPOptions: dhcpOptions })
-	//
-	//subnet := &Subnet{VPC: vpc, AvailabilityZone: String(k.Zone), CIDR: String("172.20.0.0/24"), Name: String("kubernetes-" + clusterID), ID: k.SubnetID}
-	//c.Add(subnet)
-	//
-	//igw := &InternetGateway{Name: String("kubernetes-" + clusterID), ID: k.InternetGatewayID}
-	//c.Add(igw)
-	//
-	//c.Add(&InternetGatewayAttachment{VPC: vpc, InternetGateway: igw})
-	//
-	//routeTable := &RouteTable{VPC: vpc, Name: String("kubernetes-" + clusterID), ID: k.RouteTableID}
-	//c.Add(routeTable)
-	//
-	//route := &Route{RouteTable: routeTable, CIDR: String("0.0.0.0/0"), InternetGateway: igw}
-	//c.Add(route)
-	//
-	//c.Add(&RouteTableAssociation{RouteTable: routeTable, Subnet: subnet})
-	//
-	//masterSG := &SecurityGroup{
-	//	Name:        String("kubernetes-master-" + clusterID),
-	//	Description: String("Security group for master nodes"),
-	//	VPC:         vpc}
-	//c.Add(masterSG)
-	//
-	//nodeSG := &SecurityGroup{
-	//	Name:        String("kubernetes-minion-" + clusterID),
-	//	Description: String("Security group for minion nodes"),
-	//	VPC:         vpc}
-	//c.Add(nodeSG)
-	//
-	//c.Add(masterSG.AllowFrom(masterSG))
-	//c.Add(masterSG.AllowFrom(nodeSG))
-	//c.Add(nodeSG.AllowFrom(masterSG))
-	//c.Add(nodeSG.AllowFrom(nodeSG))
-	//
-
-	// Allow all internal traffic
-	c.Add(&gceunits.FirewallRule{
-		Name: fi.String(networkName + "-default-internal"),
-		Network: network,
-		SourceRanges: []string{"10.0.0.0/8"},
-		Allowed: []string{"tcp:1-65535", "udp:1-65535", "icmp"},
-	})
-
-	// SSH is open to the world
-	c.Add(&gceunits.FirewallRule{
-		Name: fi.String(networkName + "-default-ssh"),
-		Network: network,
-		SourceRanges: []string{"0.0.0.0/0"},
-		Allowed: []string{"tcp:22"},
-	})
-
-
-	//c.Add(nodeSG.AllowTCP("0.0.0.0/0", 22, 22))
-	//c.Add(masterSG.AllowTCP("0.0.0.0/0", 22, 22))
-	//
-	//// HTTPS to the master is allowed (for API access)
-	//c.Add(masterSG.AllowTCP("0.0.0.0/0", 443, 443))
-	//
-	//masterUserData := &MasterScript{
-	//	Config: k,
-	//}
-	//c.Add(masterUserData)
-	//
-	//masterBlockDeviceMappings := []*BlockDeviceMapping{}
-	//
-	//// Be sure to map all the ephemeral drives.  We can specify more than we actually have.
-	//// TODO: Actually mount the correct number (especially if we have more), though this is non-trivial, and
-	////  only affects the big storage instance types, which aren't a typical use case right now.
-	//for i := 0; i < 4; i++ {
-	//	bdm := &BlockDeviceMapping{
-	//		DeviceName:  String("/dev/sd" + string('c' + i)),
-	//		VirtualName: String("ephemeral" + strconv.Itoa(i)),
-	//	}
-	//	masterBlockDeviceMappings = append(masterBlockDeviceMappings, bdm)
-	//}
-	//
-	//nodeBlockDeviceMappings := masterBlockDeviceMappings
-	//nodeUserData := &NodeScript{
-	//	Config: k,
-	//}
-	//c.Add(nodeUserData)
-
-	// TODO: Make configurable
-	masterImage := "google-containers/container-vm-v20160321"
-
-	nodeCount := k.NodeCount
-
-	masterInstanceType := k.MasterInstanceType
-	if masterInstanceType == "" {
-		if nodeCount > 500 {
-			masterInstanceType = "n1-standard-32"
-		} else if nodeCount > 250 {
-			masterInstanceType = "n1-standard-16"
-		} else if nodeCount > 100 {
-			masterInstanceType = "n1-standard-8"
-		} else if nodeCount > 10 {
-			masterInstanceType = "n1-standard-4"
-		} else if nodeCount > 5 {
-			masterInstanceType = "n1-standard-2"
-		} else {
-			masterInstanceType = "n1-standard-1"
-		}
-	}
-	masterMetadata := map[string]fi.Resource{
-		"startup-script": k.BootstrapScript, // cluster/gce/configure-vm.sh
-		"kube-env": fi.NewFuncResource(func() ([]byte, error) {
-			isMaster := true
-			data, err := k.BuildEnv(isMaster)
-			if err != nil {
-				return nil, err
-			}
-
-			yamlData, err := yaml.Marshal(data)
-			if err != nil {
-				return nil, fmt.Errorf("error marshaling env to yaml: %v", err)
-			}
-			return yamlData, nil
-		}),
-		"cluster-name"        : fi.NewStringResource(clusterID),
-	}
-	masterInstance := &gceunits.Instance{
-		Name: &k.MasterName,
-		IPAddress: masterIP,
-		Zone: &zone,
-		MachineType: &masterInstanceType,
-		Image: &masterImage,
-		Tags: []string{masterTag},
-		Network: network,
-		Scopes: []string{"storage-ro", "compute-rw", "monitoring", "logging-write"},
-		CanIPForward: fi.Bool(true),
-		Metadata: masterMetadata,
-		Disks: map[string]*gceunits.PersistentDisk{
-			"master-pd": masterPV,
-		},
-	}
-	// TODO: Preemptible master
-	masterInstance.Preemptible = fi.Bool(false)
-	c.Add(masterInstance)
-
-
-
-	//c.Add(&InstanceElasticIPAttachment{Instance:masterInstance, ElasticIP: masterIP})
-	//c.Add(&InstanceVolumeAttachment{Instance:masterInstance, Volume: masterPV, Device: String("/dev/sdb")})
-	//
-	//nodeGroup := &AutoscalingGroup{
-	//	Name:                String(clusterID + "-minion-group"),
-	//	MinSize:             Int64(int64(k.NodeCount)),
-	//	MaxSize:             Int64(int64(k.NodeCount)),
-	//	Subnet:              subnet,
-	//	Tags: map[string]string{
-	//		"Role": "node",
+	//masterInstance := &gceunits.Instance{
+	//	Name:         &k.MasterName,
+	//	IPAddress:    masterIP,
+	//	Zone:         &zone,
+	//	MachineType:  &masterInstanceType,
+	//	Image:        &masterImage,
+	//	Tags:         []string{masterTag},
+	//	Network:      network,
+	//	Scopes:       []string{"storage-ro", "compute-rw", "monitoring", "logging-write"},
+	//	CanIPForward: fi.Bool(true),
+	//	Metadata:     masterMetadata,
+	//	Disks: map[string]*gceunits.PersistentDisk{
+	//		"master-pd": masterPV,
 	//	},
-	//	InstanceCommonConfig: InstanceCommonConfig{
-	//		SSHKey:              sshKey,
-	//		SecurityGroups:      []*SecurityGroup{nodeSG},
-	//		IAMInstanceProfile:  iamNodeInstanceProfile,
-	//		ImageID:             String(k.ImageID),
-	//		InstanceType:        String(k.NodeInstanceType),
-	//		AssociatePublicIP:   Bool(true),
-	//		BlockDeviceMappings: nodeBlockDeviceMappings,
-	//	},
-	//	UserData:            nodeUserData,
 	//}
-	//c.Add(nodeGroup)
+	//// TODO: Preemptible master
+	//masterInstance.Preemptible = fi.Bool(false)
+	//c.Add(masterInstance)
 
-	// Allow traffic from nodes -> nodes
-	c.Add(&gceunits.FirewallRule{
-		Name: fi.String(nodeTag + "-all"),
-		Network: network,
-		SourceRanges: []string{k.ClusterIPRange},
-		TargetTags: []string{nodeTag},
-		Allowed: []string{"tcp", "udp", "icmp", "esp", "ah", "sctp"},
-	})
+	//// Allow traffic from nodes -> nodes
+	//c.Add(&gceunits.FirewallRule{
+	//	Name:         fi.String(nodeTag + "-all"),
+	//	Network:      network,
+	//	SourceRanges: []string{k.ClusterIPRange},
+	//	TargetTags:   []string{nodeTag},
+	//	Allowed:      []string{"tcp", "udp", "icmp", "esp", "ah", "sctp"},
+	//})
 
-	nodeMachineType := k.NodeInstanceType
-	if nodeMachineType == "" {
-		nodeMachineType = "n1-standard-2"
-	}
-	// TODO: Make configurable
-	nodeDiskType := "pd-standard"
-	nodeDiskSize := int64(100)
-	nodeImage := "google-containers/container-vm-v20160321"
-
-	nodeMetadata := map[string]fi.Resource{
-		"startup-script": k.BootstrapScript, // cluster/gce/configure-vm.sh
-		"kube-env": fi.NewFuncResource(func() ([]byte, error) {
-			isMaster := false
-			data, err := k.BuildEnv(isMaster)
-			if err != nil {
-				return nil, err
-			}
-
-			yamlData, err := yaml.Marshal(data)
-			if err != nil {
-				return nil, fmt.Errorf("error marshaling env to yaml: %v", err)
-			}
-			return yamlData, nil
-		}),
-		"cluster-name"        : fi.NewStringResource(clusterID),
-	}
-	nodeTemplate := &gceunits.InstanceTemplate{
-		Name: fi.String(k.NodeInstancePrefix + "-template"),
-		Network: network,
-		MachineType: &nodeMachineType,
-		BootDiskType: &nodeDiskType,
-		BootDiskSizeGB: &nodeDiskSize,
-		BootDiskImage: &nodeImage,
-		Tags: []string{nodeTag},
-		CanIPForward: fi.Bool(true),
-		Metadata: nodeMetadata,
-	}
-
-	nodeTemplate.Scopes = []string{"compute-rw", "monitoring", "logging-write", "storage-ro"}
-
-	// TODO: Support preemptible nodes?
-	nodeTemplate.Preemptible = fi.Bool(false)
-	c.Add(nodeTemplate)
-
-	// TODO: Support mulitple instance groups
-	nodeInstances := &gceunits.ManagedInstanceGroup{
-		Name: fi.String(k.NodeInstancePrefix + "-group"),
-		Zone: &zone,
-		BaseInstanceName: fi.String(k.NodeInstancePrefix),
-		TargetSize: fi.Int64(int64(nodeCount)),
-		InstanceTemplate: nodeTemplate,
-	}
-	c.Add(nodeInstances)
-
-
+	//nodeMachineType := k.NodeInstanceType
+	//if nodeMachineType == "" {
+	//	nodeMachineType = "n1-standard-2"
+	//}
+	//// TODO: Make configurable
+	//nodeDiskType := "pd-standard"
+	//nodeDiskSize := int64(100)
+	//nodeImage := "google-containers/container-vm-v20160321"
+	//
+	//nodeMetadata := map[string]fi.Resource{
+	//	"startup-script": k.BootstrapScript, // cluster/gce/configure-vm.sh
+	//	"kube-env": fi.NewFuncResource(func() ([]byte, error) {
+	//		isMaster := false
+	//		data, err := k.BuildEnv(isMaster)
+	//		if err != nil {
+	//			return nil, err
+	//		}
+	//
+	//		yamlData, err := yaml.Marshal(data)
+	//		if err != nil {
+	//			return nil, fmt.Errorf("error marshaling env to yaml: %v", err)
+	//		}
+	//		return yamlData, nil
+	//	}),
+	//	"cluster-name": fi.NewStringResource(clusterID),
+	//}
+	//nodeTemplate := &gceunits.InstanceTemplate{
+	//	Name:           fi.String(k.NodeInstancePrefix + "-template"),
+	//	Network:        network,
+	//	MachineType:    &nodeMachineType,
+	//	BootDiskType:   &nodeDiskType,
+	//	BootDiskSizeGB: &nodeDiskSize,
+	//	BootDiskImage:  &nodeImage,
+	//	Tags:           []string{nodeTag},
+	//	CanIPForward:   fi.Bool(true),
+	//	Metadata:       nodeMetadata,
+	//}
+	//
+	//nodeTemplate.Scopes = []string{"compute-rw", "monitoring", "logging-write", "storage-ro"}
+	//
+	//// TODO: Support preemptible nodes?
+	//nodeTemplate.Preemptible = fi.Bool(false)
+	//c.Add(nodeTemplate)
+	//
+	//// TODO: Support mulitple instance groups
+	//nodeInstances := &gceunits.ManagedInstanceGroup{
+	//	Name:             fi.String(k.NodeInstancePrefix + "-group"),
+	//	Zone:             &zone,
+	//	BaseInstanceName: fi.String(k.NodeInstancePrefix),
+	//	TargetSize:       fi.Int64(int64(nodeCount)),
+	//	InstanceTemplate: nodeTemplate,
+	//}
+	//c.Add(nodeInstances)
 
 	// CREATE AUTOSCALER
 
@@ -1277,7 +1077,7 @@ func (k *K8s) GetWellKnownServiceIP(id int) (net.IP, error) {
 		serviceIP := make(net.IP, len(ip6))
 		serviceIPBytes := serviceIPInt.Bytes()
 		for i := range serviceIPBytes {
-			serviceIP[len(serviceIP) - len(serviceIPBytes) + i] = serviceIPBytes[i]
+			serviceIP[len(serviceIP)-len(serviceIPBytes)+i] = serviceIPBytes[i]
 		}
 		return serviceIP, nil
 	}

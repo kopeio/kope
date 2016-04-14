@@ -81,7 +81,7 @@ func (s *IAMInstanceProfileRole) checkChanges(a, e, changes *IAMInstanceProfileR
 	return nil
 }
 
-func (_*IAMInstanceProfileRole) RenderAWS(t *fi.AWSAPITarget, a, e, changes *IAMInstanceProfileRole) error {
+func (_ *IAMInstanceProfileRole) RenderAWS(t *fi.AWSAPITarget, a, e, changes *IAMInstanceProfileRole) error {
 	if a == nil {
 		request := &iam.AddRoleToInstanceProfileInput{}
 		request.InstanceProfileName = e.InstanceProfile.Name
@@ -96,7 +96,7 @@ func (_*IAMInstanceProfileRole) RenderAWS(t *fi.AWSAPITarget, a, e, changes *IAM
 	return nil //return output.AddAWSTags(cloud.Tags(), v, "vpc")
 }
 
-func (_*IAMInstanceProfileRole) RenderBash(t *fi.BashTarget, a, e, changes *IAMInstanceProfileRole) error {
+func (_ *IAMInstanceProfileRole) RenderBash(t *fi.BashTarget, a, e, changes *IAMInstanceProfileRole) error {
 	if a == nil {
 		glog.V(2).Infof("Creating IAMInstanceProfileRole")
 

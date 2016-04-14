@@ -1,0 +1,43 @@
+# TODO: Support multiple masters
+
+persistentDisk:
+  name: {{ .masterName }}-pd
+  zone: {{ .zone }}
+  sizeGB: {{ or .masterVolumeSize 20 }}
+  volumeType: {{ or .masterVolumeType "pd-ssd" }}
+
+# Open master HTTPS
+firewallRule:
+  name: {{ .masterName }}-https
+  network: network/default
+  sourceRanges: 0.0.0.0/0
+  targetTags: {{ .masterTag }}
+  allowed: tcp:443
+
+# Allocate master IP
+ipAddress:
+  name: {{ .masterName }}-ip
+  address: {{ .MasterElasticIP }}
+
+# Master instance
+instance:
+  name: {{ .masterName }}
+  ipaddress: ipAddress/{{ .masterName }}-ip
+  zone: {{ .zone }}
+  machineType: {{ .masterMachineType }}
+  image: {{ .masterImage }}
+  tags: {{ .masterTag }}
+  network: network/default
+  scopes:
+    storage-ro
+    compute-rw
+    monitoring
+    logging-write
+  canIpForward: true
+  disks:
+    master-pd: persistentDisk/{{ .masterName }}-pd
+  metadata:
+    startup-script: asset/gce-configure-vm.sh
+    kube-env: assets/kube-env
+    cluster-name: assets/cluster-name
+  preemptible: false

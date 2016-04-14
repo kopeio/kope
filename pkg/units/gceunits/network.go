@@ -5,8 +5,8 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/kopeio/kope/pkg/fi"
-	"google.golang.org/api/compute/v1"
 	"github.com/kopeio/kope/pkg/fi/gce"
+	"google.golang.org/api/compute/v1"
 )
 
 type Network struct {
@@ -15,7 +15,7 @@ type Network struct {
 	Name *string
 	CIDR *string
 
-	url  string
+	url string
 }
 
 func (s *Network) Key() string {
@@ -80,7 +80,7 @@ func (s *Network) checkChanges(a, e, changes *Network) error {
 	return nil
 }
 
-func (_*Network) RenderGCE(t *gce.GCEAPITarget, a, e, changes *Network) error {
+func (_ *Network) RenderGCE(t *gce.GCEAPITarget, a, e, changes *Network) error {
 	if a == nil {
 		glog.V(2).Infof("Creating Network with CIDR: %q", *e.CIDR)
 

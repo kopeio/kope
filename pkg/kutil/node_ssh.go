@@ -1,13 +1,13 @@
 package kutil
 
 import (
+	"encoding/base64"
+	"fmt"
+	"github.com/golang/glog"
+	"github.com/kopeio/kope/pkg/fi"
 	"golang.org/x/crypto/ssh"
 	"io/ioutil"
-	"fmt"
 	"strings"
-	"github.com/golang/glog"
-	"encoding/base64"
-	"github.com/kopeio/kope/pkg/fi"
 )
 
 type NodeSSH struct {
@@ -16,7 +16,7 @@ type NodeSSH struct {
 	sshClient *ssh.Client
 }
 
-func (m*NodeSSH) AddSSHIdentity(p string) error {
+func (m *NodeSSH) AddSSHIdentity(p string) error {
 	a, err := parsePrivateKeyFile(p)
 	if err != nil {
 		return err
@@ -25,7 +25,7 @@ func (m*NodeSSH) AddSSHIdentity(p string) error {
 	return nil
 }
 
-func (m*NodeSSH) dial() (*ssh.Client, error) {
+func (m *NodeSSH) dial() (*ssh.Client, error) {
 	users := []string{"admin", "ubuntu"}
 	if m.SSHConfig.User != "" {
 		users = []string{m.SSHConfig.User}
@@ -34,7 +34,7 @@ func (m*NodeSSH) dial() (*ssh.Client, error) {
 	var lastError error
 	for _, user := range users {
 		m.SSHConfig.User = user
-		sshClient, err := ssh.Dial("tcp", m.IP + ":22", &m.SSHConfig)
+		sshClient, err := ssh.Dial("tcp", m.IP+":22", &m.SSHConfig)
 		if err == nil {
 			return sshClient, err
 		}
@@ -44,7 +44,7 @@ func (m*NodeSSH) dial() (*ssh.Client, error) {
 	return nil, fmt.Errorf("error connecting to SSH on server %q: %v", m.IP, lastError)
 }
 
-func (m*NodeSSH) GetSSHClient() (*ssh.Client, error) {
+func (m *NodeSSH) GetSSHClient() (*ssh.Client, error) {
 	if m.sshClient == nil {
 		sshClient, err := m.dial()
 		if err != nil {
@@ -55,7 +55,7 @@ func (m*NodeSSH) GetSSHClient() (*ssh.Client, error) {
 	return m.sshClient, nil
 }
 
-func (m*NodeSSH) ReadConfiguration() (*MasterConfiguration, error) {
+func (m *NodeSSH) ReadConfiguration() (*MasterConfiguration, error) {
 	sshClient, err := m.GetSSHClient()
 	if err != nil {
 		return nil, err
@@ -66,7 +66,6 @@ func (m*NodeSSH) ReadConfiguration() (*MasterConfiguration, error) {
 		return nil, fmt.Errorf("error creating SSH session: %v", err)
 	}
 	defer sshSession.Close()
-
 
 	//output, err := sshSession.CombinedOutput("cat /etc/kubernetes/kube_env.yaml")
 	//if err != nil {
@@ -113,15 +112,15 @@ func (m*NodeSSH) ReadConfiguration() (*MasterConfiguration, error) {
 			v := ""
 			if sep != -1 {
 				k = line[0:sep]
-				v = line[sep + 1:]
+				v = line[sep+1:]
 			}
 
 			if k == "" {
 				glog.V(4).Infof("Unknown line: %s", line)
 			}
 
-			if len(v) >= 2 && v[0] == '\'' && v[len(v) - 1] == '\'' {
-				v = v[1:len(v) - 1]
+			if len(v) >= 2 && v[0] == '\'' && v[len(v)-1] == '\'' {
+				v = v[1 : len(v)-1]
 			}
 			settings[k] = v
 		}
@@ -132,28 +131,28 @@ func (m*NodeSSH) ReadConfiguration() (*MasterConfiguration, error) {
 			v := ""
 			if sep != -1 {
 				k = line[0:sep]
-				v = line[sep + 2:]
+				v = line[sep+2:]
 			}
 
 			if k == "" {
 				glog.V(4).Infof("Unknown line: %s", line)
 			}
 
-			if len(v) >= 2 && v[0] == '"' && v[len(v) - 1] == '"' {
-				v = v[1:len(v) - 1]
+			if len(v) >= 2 && v[0] == '"' && v[len(v)-1] == '"' {
+				v = v[1 : len(v)-1]
 			}
 			settings[k] = v
 		}
 	}
 
 	c := &MasterConfiguration{
-		Version: version,
+		Version:  version,
 		Settings: settings,
 	}
 	return c, nil
 }
 
-func (m*NodeSSH) ReadFile(remotePath string) ([]byte, error) {
+func (m *NodeSSH) ReadFile(remotePath string) ([]byte, error) {
 	b, err := m.exec("sudo cat " + remotePath)
 	if err != nil {
 		return nil, fmt.Errorf("error reading remote file %q: %v", remotePath, err)
@@ -161,7 +160,7 @@ func (m*NodeSSH) ReadFile(remotePath string) ([]byte, error) {
 	return b, nil
 }
 
-func (m*NodeSSH) exec(cmd string) ([]byte, error) {
+func (m *NodeSSH) exec(cmd string) ([]byte, error) {
 	client, err := m.GetSSHClient()
 	if err != nil {
 		return nil, err
@@ -180,19 +179,19 @@ func (m*NodeSSH) exec(cmd string) ([]byte, error) {
 	return b, nil
 }
 
-func (m*NodeSSH) GetMetadata(key string) (string, error) {
+func (m *NodeSSH) GetMetadata(key string) (string, error) {
 	b, err := m.exec("curl -s http://169.254.169.254/latest/meta-data/" + key)
 	if err != nil {
-		return "", fmt.Errorf("error querying for metadata %q: %v", key,  err)
+		return "", fmt.Errorf("error querying for metadata %q: %v", key, err)
 	}
 	return string(b), nil
 }
 
-func (m*NodeSSH) InstanceType() (string, error) {
+func (m *NodeSSH) InstanceType() (string, error) {
 	return m.GetMetadata("instance-type")
 }
 
-func (m*NodeSSH) GetMetadataList(key string) ([]string, error) {
+func (m *NodeSSH) GetMetadataList(key string) ([]string, error) {
 	d, err := m.GetMetadata(key)
 	if err != nil {
 		return nil, err
@@ -210,7 +209,6 @@ func (m*NodeSSH) GetMetadataList(key string) ([]string, error) {
 
 	return macs, nil
 }
-
 
 func parsePrivateKeyFile(p string) (ssh.AuthMethod, error) {
 	buffer, err := ioutil.ReadFile(p)

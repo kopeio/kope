@@ -2,16 +2,16 @@ package kutil
 
 import (
 	"fmt"
-	"strings"
-	"net/http"
+	"github.com/golang/glog"
 	"io/ioutil"
-"github.com/golang/glog"
+	"net/http"
+	"strings"
 )
 
 type KubernetesReleases struct {
 }
 
-func (c*KubernetesReleases) Latest() (string, error) {
+func (c *KubernetesReleases) Latest() (string, error) {
 	u := "https://storage.googleapis.com/kubernetes-release/release/stable.txt"
 
 	glog.V(2).Infof("Requesting URL %q", u)

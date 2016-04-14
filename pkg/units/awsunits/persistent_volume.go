@@ -102,7 +102,7 @@ func (s *PersistentVolume) checkChanges(a, e, changes *PersistentVolume) error {
 	return nil
 }
 
-func (_*PersistentVolume) RenderAWS(t *fi.AWSAPITarget, a, e, changes *PersistentVolume) error {
+func (_ *PersistentVolume) RenderAWS(t *fi.AWSAPITarget, a, e, changes *PersistentVolume) error {
 	if a == nil {
 		glog.V(2).Infof("Creating PersistentVolume with Name:%q", *e.Name)
 
@@ -122,7 +122,7 @@ func (_*PersistentVolume) RenderAWS(t *fi.AWSAPITarget, a, e, changes *Persisten
 	return t.AddAWSTags(*e.ID, t.Cloud.BuildTags(e.Name))
 }
 
-func (_*PersistentVolume) RenderBash(t *fi.BashTarget, a, e, changes *PersistentVolume) error {
+func (_ *PersistentVolume) RenderBash(t *fi.BashTarget, a, e, changes *PersistentVolume) error {
 	t.CreateVar(e)
 	if a == nil {
 		glog.V(2).Infof("Creating PersistentVolume with Name:%q", *e.Name)

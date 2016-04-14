@@ -3,31 +3,31 @@ package gceunits
 import (
 	"fmt"
 
-	"github.com/kopeio/kope/pkg/fi"
-	"google.golang.org/api/compute/v1"
 	"github.com/golang/glog"
+	"github.com/kopeio/kope/pkg/fi"
 	"github.com/kopeio/kope/pkg/fi/gce"
+	"google.golang.org/api/compute/v1"
 )
 
 type InstanceTemplate struct {
 	fi.SimpleUnit
 
-	Name           *string
-	Network        *Network
-	Tags           []string
-	Preemptible    *bool
+	Name        *string
+	Network     *Network
+	Tags        []string
+	Preemptible *bool
 
 	BootDiskImage  *string
 	BootDiskSizeGB *int64
 	BootDiskType   *string
 
-	CanIPForward   *bool
-	Subnet         *Subnet
+	CanIPForward *bool
+	Subnet       *Subnet
 
-	Scopes         []string
+	Scopes []string
 
-	Metadata       map[string]fi.Resource
-	MachineType    *string
+	Metadata    map[string]fi.Resource
+	MachineType *string
 }
 
 func (s *InstanceTemplate) Key() string {
@@ -140,7 +140,7 @@ func (s *InstanceTemplate) checkChanges(a, e, changes *InstanceTemplate) error {
 	return nil
 }
 
-func (_*InstanceTemplate) RenderGCE(t *gce.GCEAPITarget, a, e, changes *InstanceTemplate) error {
+func (_ *InstanceTemplate) RenderGCE(t *gce.GCEAPITarget, a, e, changes *InstanceTemplate) error {
 	project := t.Cloud.Project
 
 	// TODO: This is similar to Instance...
@@ -149,14 +149,14 @@ func (_*InstanceTemplate) RenderGCE(t *gce.GCEAPITarget, a, e, changes *Instance
 	if fi.BoolValue(e.Preemptible) {
 		scheduling = &compute.Scheduling{
 			OnHostMaintenance: "TERMINATE",
-			Preemptible: true,
+			Preemptible:       true,
 		}
 	} else {
 		scheduling = &compute.Scheduling{
 			AutomaticRestart: true,
 			// TODO: Migrate or terminate?
 			OnHostMaintenance: "MIGRATE",
-			Preemptible: false,
+			Preemptible:       false,
 		}
 	}
 
@@ -166,15 +166,15 @@ func (_*InstanceTemplate) RenderGCE(t *gce.GCEAPITarget, a, e, changes *Instance
 	disks = append(disks, &compute.AttachedDisk{
 		InitializeParams: &compute.AttachedDiskInitializeParams{
 			SourceImage: BuildImageURL(project, *e.BootDiskImage),
-			DiskSizeGb: *e.BootDiskSizeGB,
-			DiskType: *e.BootDiskType,
+			DiskSizeGb:  *e.BootDiskSizeGB,
+			DiskType:    *e.BootDiskType,
 		},
-		Boot: true,
-		DeviceName:"persistent-disks-0",
-		Index:0,
-		AutoDelete:true,
-		Mode: "READ_WRITE",
-		Type: "PERSISTENT",
+		Boot:       true,
+		DeviceName: "persistent-disks-0",
+		Index:      0,
+		AutoDelete: true,
+		Mode:       "READ_WRITE",
+		Type:       "PERSISTENT",
 	})
 
 	var tags *compute.Tags
@@ -206,7 +206,7 @@ func (_*InstanceTemplate) RenderGCE(t *gce.GCEAPITarget, a, e, changes *Instance
 			scopes = append(scopes, s)
 		}
 		serviceAccounts = append(serviceAccounts, &compute.ServiceAccount{
-			Email:"default",
+			Email:  "default",
 			Scopes: scopes,
 		})
 	}
@@ -218,7 +218,7 @@ func (_*InstanceTemplate) RenderGCE(t *gce.GCEAPITarget, a, e, changes *Instance
 			return fmt.Errorf("error rendering InstanceTemplate metadata %q: %v", key, err)
 		}
 		metadataItems = append(metadataItems, &compute.MetadataItems{
-			Key: key,
+			Key:   key,
 			Value: fi.String(v),
 		})
 	}

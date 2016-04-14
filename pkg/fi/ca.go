@@ -1,22 +1,22 @@
 package fi
 
 import (
-	"crypto/x509/pkix"
-	"crypto/x509"
 	"crypto"
 	crypto_rand "crypto/rand"
-	"fmt"
-	"time"
 	"crypto/rsa"
-	"math/big"
-	"io"
+	"crypto/x509"
+	"crypto/x509/pkix"
 	"encoding/pem"
+	"fmt"
 	"github.com/golang/glog"
+	"io"
+	"math/big"
+	"time"
 )
 
 type Certificate struct {
-	Subject     pkix.Name
-	IsCA        bool
+	Subject pkix.Name
+	IsCA    bool
 
 	Certificate *x509.Certificate
 	PublicKey   crypto.PublicKey
@@ -38,10 +38,10 @@ func LoadCertificate(pemData []byte) (*Certificate, error) {
 	}
 
 	c := &Certificate{
-		Subject: cert.Subject,
+		Subject:     cert.Subject,
 		Certificate: cert,
-		PublicKey: cert.PublicKey,
-		IsCA: cert.IsCA,
+		PublicKey:   cert.PublicKey,
+		IsCA:        cert.IsCA,
 	}
 	return c, nil
 }
@@ -109,7 +109,7 @@ func SignNewCertificate(privateKey crypto.PrivateKey, template *x509.Certificate
 	return c, nil
 }
 
-func (c*Certificate) WriteCertificate(w io.Writer) error {
+func (c *Certificate) WriteCertificate(w io.Writer) error {
 	return pem.Encode(w, &pem.Block{Type: "CERTIFICATE", Bytes: c.Certificate.Raw})
 }
 

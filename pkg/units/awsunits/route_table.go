@@ -89,7 +89,7 @@ func (s *RouteTable) checkChanges(a, e, changes *RouteTable) error {
 	return nil
 }
 
-func (_*RouteTable) RenderAWS(t *fi.AWSAPITarget, a, e, changes *RouteTable) error {
+func (_ *RouteTable) RenderAWS(t *fi.AWSAPITarget, a, e, changes *RouteTable) error {
 	if a == nil {
 		vpcID := e.VPC.ID
 		if vpcID == nil {
@@ -113,7 +113,7 @@ func (_*RouteTable) RenderAWS(t *fi.AWSAPITarget, a, e, changes *RouteTable) err
 	return t.AddAWSTags(*e.ID, t.Cloud.BuildTags(e.Name))
 }
 
-func (_*RouteTable) RenderBash(t *fi.BashTarget, a, e, changes *RouteTable) error {
+func (_ *RouteTable) RenderBash(t *fi.BashTarget, a, e, changes *RouteTable) error {
 	t.CreateVar(e)
 	if a == nil {
 		vpcID := t.ReadVar(e.VPC)

@@ -3,10 +3,10 @@ package awsunits
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/golang/glog"
 	"github.com/kopeio/kope/pkg/fi"
-"github.com/aws/aws-sdk-go/aws"
 )
 
 type InternetGateway struct {
@@ -85,12 +85,11 @@ func (s *InternetGateway) checkChanges(a, e, changes *InternetGateway) error {
 	return nil
 }
 
-func (_*InternetGateway) RenderAWS(t *fi.AWSAPITarget, a, e, changes *InternetGateway) error {
+func (_ *InternetGateway) RenderAWS(t *fi.AWSAPITarget, a, e, changes *InternetGateway) error {
 	if a == nil {
 		glog.V(2).Infof("Creating InternetGateway")
 
-		request := &ec2.CreateInternetGatewayInput{
-		}
+		request := &ec2.CreateInternetGatewayInput{}
 
 		response, err := t.Cloud.EC2.CreateInternetGateway(request)
 		if err != nil {
@@ -104,7 +103,7 @@ func (_*InternetGateway) RenderAWS(t *fi.AWSAPITarget, a, e, changes *InternetGa
 	return t.AddAWSTags(*e.ID, t.Cloud.BuildTags(e.Name))
 }
 
-func (_*InternetGateway) RenderBash(t *fi.BashTarget, a, e, changes *InternetGateway) error {
+func (_ *InternetGateway) RenderBash(t *fi.BashTarget, a, e, changes *InternetGateway) error {
 	t.CreateVar(e)
 	if a == nil {
 		t.AddEC2Command("create-internet-gateway", "--query", "InternetGateway.InternetGatewayId").AssignTo(e)

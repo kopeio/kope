@@ -3,10 +3,10 @@ package awsunits
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/golang/glog"
 	"github.com/kopeio/kope/pkg/fi"
-	"github.com/aws/aws-sdk-go/aws"
 )
 
 type DHCPOptions struct {
@@ -35,7 +35,7 @@ func (e *DHCPOptions) find(c *fi.RunContext) (*DHCPOptions, error) {
 
 	request := &ec2.DescribeDhcpOptionsInput{}
 	if e.ID != nil {
-		request.DhcpOptionsIds = []*string{e.ID }
+		request.DhcpOptionsIds = []*string{e.ID}
 	} else {
 		request.Filters = cloud.BuildFilters(e.Name)
 	}
@@ -65,7 +65,7 @@ func (e *DHCPOptions) find(c *fi.RunContext) (*DHCPOptions, error) {
 			}
 			v = v + *av.Value
 		}
-		switch (k) {
+		switch k {
 		case "domain-name":
 			actual.DomainName = &v
 		case "domain-name-servers":
@@ -118,21 +118,21 @@ func (s *DHCPOptions) checkChanges(a, e, changes *DHCPOptions) error {
 	return nil
 }
 
-func (_*DHCPOptions) RenderAWS(t *fi.AWSAPITarget, a, e, changes *DHCPOptions) error {
+func (_ *DHCPOptions) RenderAWS(t *fi.AWSAPITarget, a, e, changes *DHCPOptions) error {
 	if a == nil {
 		glog.V(2).Infof("Creating DHCPOptions with Name:%q", *e.Name)
 
 		request := &ec2.CreateDhcpOptionsInput{}
 		if e.DomainNameServers != nil {
 			o := &ec2.NewDhcpConfiguration{
-				Key: aws.String("domain-name-servers"),
+				Key:    aws.String("domain-name-servers"),
 				Values: []*string{e.DomainNameServers},
 			}
 			request.DhcpConfigurations = append(request.DhcpConfigurations, o)
 		}
 		if e.DomainName != nil {
 			o := &ec2.NewDhcpConfiguration{
-				Key: aws.String("domain-name"),
+				Key:    aws.String("domain-name"),
 				Values: []*string{e.DomainName},
 			}
 			request.DhcpConfigurations = append(request.DhcpConfigurations, o)
@@ -149,7 +149,7 @@ func (_*DHCPOptions) RenderAWS(t *fi.AWSAPITarget, a, e, changes *DHCPOptions) e
 	return t.AddAWSTags(*e.ID, t.Cloud.BuildTags(e.Name))
 }
 
-func (_*DHCPOptions) RenderBash(t *fi.BashTarget, a, e, changes *DHCPOptions) error {
+func (_ *DHCPOptions) RenderBash(t *fi.BashTarget, a, e, changes *DHCPOptions) error {
 	t.CreateVar(e)
 	if a == nil {
 		glog.V(2).Infof("Creating DHCPOptions with Name:%q", *e.Name)
